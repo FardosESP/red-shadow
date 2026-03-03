@@ -338,7 +338,7 @@ def check_deps():
 # MOTOR DE ANALISIS (importado dinamicamente)
 # ============================================================================
 
-def run_engine(dump_path, no_gui=False, web_gui=False):
+def run_engine(dump_path, no_gui=False, cmd_gui=False):
     """Ejecutar el motor de analisis v4"""
     engine_path = INSTALL_DIR / "red_shadow_destroyer_v4.py"
     if not engine_path.exists():
@@ -346,10 +346,11 @@ def run_engine(dump_path, no_gui=False, web_gui=False):
         return
 
     cmd = [sys.executable, str(engine_path), dump_path]
-    if web_gui:
-        cmd.append("--web-gui")
-    elif no_gui:
+    if no_gui:
         cmd.append("--no-gui")
+    elif cmd_gui:
+        cmd.append("--cmd-gui")
+    # Default: web GUI (no flag needed)
 
     try:
         subprocess.run(cmd, check=False)
@@ -395,9 +396,9 @@ def main_menu():
         # Menu
         print(f"""
   {C.BC}[1]{C.X} Seleccionar ruta del dump
-  {C.BC}[2]{C.X} Ejecutar analisis completo (GUI interactivo)
-  {C.BC}[3]{C.X} Ejecutar analisis rapido (sin GUI)
-  {C.BC}[4]{C.X} Abrir analisis en Web Dashboard (navegador)
+  {C.BC}[2]{C.X} Ejecutar analisis (Web Dashboard)
+  {C.BC}[3]{C.X} Ejecutar analisis (sin interfaz, solo exportar)
+  {C.BC}[4]{C.X} Ejecutar analisis (terminal legacy)
   {C.BC}[5]{C.X} Buscar actualizaciones
   {C.BC}[6]{C.X} Reinstalar / Reparar herramienta
   {C.BC}[7]{C.X} Informacion del proyecto
@@ -419,11 +420,10 @@ def main_menu():
                 pause()
                 continue
             if not dump_path:
-                # Pedir ruta directamente
                 dump_path = menu_select_dump()
                 if not dump_path:
                     continue
-            run_engine(dump_path, no_gui=False)
+            run_engine(dump_path)
             pause()
 
         elif choice == '3':
@@ -447,7 +447,7 @@ def main_menu():
                 dump_path = menu_select_dump()
                 if not dump_path:
                     continue
-            run_engine(dump_path, web_gui=True)
+            run_engine(dump_path, cmd_gui=True)
             pause()
 
         elif choice == '5':
@@ -613,8 +613,8 @@ def main():
             install_project()
         check_updates()
         no_gui = "--no-gui" in sys.argv
-        web_gui = "--web-gui" in sys.argv
-        run_engine(sys.argv[1], no_gui=no_gui, web_gui=web_gui)
+        cmd_gui = "--cmd-gui" in sys.argv
+        run_engine(sys.argv[1], no_gui=no_gui, cmd_gui=cmd_gui)
         return
 
     # Modo interactivo

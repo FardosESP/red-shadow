@@ -111,11 +111,11 @@ Se abrira el menu interactivo en la terminal donde puedes:
 
 El launcher se encarga de todo: instala el proyecto si no existe, verifica updates, y lanza el motor de analisis.
 
-### Modo legacy (argumentos)
+### Modo directo (argumentos)
 ```bash
-python main.py /ruta/al/dump              # Analisis con GUI en CMD
-python main.py /ruta/al/dump --no-gui     # Analisis sin GUI (output directo)
-python main.py /ruta/al/dump --web-gui    # Analisis + Web Dashboard en navegador
+python main.py /ruta/al/dump              # Analisis + Web Dashboard en navegador (default)
+python main.py /ruta/al/dump --no-gui     # Analisis sin interfaz (output directo + JSON)
+python main.py /ruta/al/dump --cmd-gui    # Analisis con menu interactivo en terminal (legacy)
 ```
 
 ### Abrir reporte existente en Web Dashboard
