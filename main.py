@@ -25,7 +25,8 @@ init(autoreset=True)
 GITHUB_REPO = "FardosESP/red-shadow"
 GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}"
 LOCAL_VERSION_FILE = Path(__file__).parent / ".version"
-MAIN_SCRIPT = Path(__file__).parent / "red_shadow_destroyer_v3.py"
+MAIN_SCRIPT_V3 = Path(__file__).parent / "red_shadow_destroyer_v3.py"
+MAIN_SCRIPT_V4 = Path(__file__).parent / "red_shadow_destroyer_v4.py"
 
 # ============================================================================
 # UTILIDADES
@@ -116,6 +117,7 @@ def update_tool():
     try:
         # Descargar archivos principales
         files_to_update = [
+            'red_shadow_destroyer_v4.py',
             'red_shadow_destroyer_v3.py',
             'red_shadow_destroyer_v2.py',
         ]
@@ -141,16 +143,37 @@ def update_tool():
         print(f"{Fore.RED}[!] Error durante actualización: {e}{Style.RESET_ALL}")
         return False
 
-def run_destroyer(dump_path):
+def select_version():
+    """Permitir al usuario seleccionar version del destroyer"""
+    print(f"\n{Fore.CYAN}Selecciona la version del motor de analisis:{Style.RESET_ALL}")
+    print(f"  {Fore.GREEN}[1]{Style.RESET_ALL} v4.0 - Advanced Forensic Engine (GUI interactivo, tecnicas avanzadas)")
+    print(f"  {Fore.YELLOW}[2]{Style.RESET_ALL} v3.0 - Terminal Hacker Edition")
+    print(f"  {Fore.YELLOW}[3]{Style.RESET_ALL} v2.0 - Advanced Analysis Engine")
+
+    # Default to v4
+    if MAIN_SCRIPT_V4.exists():
+        return MAIN_SCRIPT_V4
+    elif MAIN_SCRIPT_V3.exists():
+        return MAIN_SCRIPT_V3
+    return MAIN_SCRIPT_V3
+
+
+def run_destroyer(dump_path, extra_args=None):
     """Ejecutar RED-SHADOW Destroyer"""
-    if not MAIN_SCRIPT.exists():
-        print(f"{Fore.RED}[!] Script principal no encontrado: {MAIN_SCRIPT}{Style.RESET_ALL}")
+    script = select_version()
+
+    if not script.exists():
+        print(f"{Fore.RED}[!] Script principal no encontrado: {script}{Style.RESET_ALL}")
         sys.exit(1)
-    
-    print(f"\n{Fore.CYAN}[*] Ejecutando RED-SHADOW Destroyer...{Style.RESET_ALL}\n")
-    
+
+    print(f"\n{Fore.CYAN}[*] Ejecutando RED-SHADOW Destroyer ({script.name})...{Style.RESET_ALL}\n")
+
+    cmd = [sys.executable, str(script), dump_path]
+    if extra_args:
+        cmd.extend(extra_args)
+
     try:
-        subprocess.run([sys.executable, str(MAIN_SCRIPT), dump_path], check=False)
+        subprocess.run(cmd, check=False)
     except Exception as e:
         print(f"{Fore.RED}[!] Error ejecutando destroyer: {e}{Style.RESET_ALL}")
         sys.exit(1)
