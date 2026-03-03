@@ -35,6 +35,7 @@ PROJECT_FILES = [
     "red_shadow_destroyer_v4.py",
     "red_shadow_destroyer_v3.py",
     "red_shadow_destroyer_v2.py",
+    "web_gui.py",
     "main.py",
     "README.md",
     ".version",
@@ -337,7 +338,7 @@ def check_deps():
 # MOTOR DE ANALISIS (importado dinamicamente)
 # ============================================================================
 
-def run_engine(dump_path, no_gui=False):
+def run_engine(dump_path, no_gui=False, web_gui=False):
     """Ejecutar el motor de analisis v4"""
     engine_path = INSTALL_DIR / "red_shadow_destroyer_v4.py"
     if not engine_path.exists():
@@ -345,7 +346,9 @@ def run_engine(dump_path, no_gui=False):
         return
 
     cmd = [sys.executable, str(engine_path), dump_path]
-    if no_gui:
+    if web_gui:
+        cmd.append("--web-gui")
+    elif no_gui:
         cmd.append("--no-gui")
 
     try:
@@ -394,9 +397,10 @@ def main_menu():
   {C.BC}[1]{C.X} Seleccionar ruta del dump
   {C.BC}[2]{C.X} Ejecutar analisis completo (GUI interactivo)
   {C.BC}[3]{C.X} Ejecutar analisis rapido (sin GUI)
-  {C.BC}[4]{C.X} Buscar actualizaciones
-  {C.BC}[5]{C.X} Reinstalar / Reparar herramienta
-  {C.BC}[6]{C.X} Informacion del proyecto
+  {C.BC}[4]{C.X} Abrir analisis en Web Dashboard (navegador)
+  {C.BC}[5]{C.X} Buscar actualizaciones
+  {C.BC}[6]{C.X} Reinstalar / Reparar herramienta
+  {C.BC}[7]{C.X} Informacion del proyecto
   {C.BC}[0]{C.X} Salir
 """)
 
@@ -411,7 +415,7 @@ def main_menu():
 
         elif choice == '2':
             if not installed:
-                log("Motor no instalado. Usa la opcion 5 para instalar.", "ERROR")
+                log("Motor no instalado. Usa la opcion 6 para instalar.", "ERROR")
                 pause()
                 continue
             if not dump_path:
@@ -424,7 +428,7 @@ def main_menu():
 
         elif choice == '3':
             if not installed:
-                log("Motor no instalado. Usa la opcion 5 para instalar.", "ERROR")
+                log("Motor no instalado. Usa la opcion 6 para instalar.", "ERROR")
                 pause()
                 continue
             if not dump_path:
@@ -435,14 +439,26 @@ def main_menu():
             pause()
 
         elif choice == '4':
-            menu_update()
+            if not installed:
+                log("Motor no instalado. Usa la opcion 6 para instalar.", "ERROR")
+                pause()
+                continue
+            if not dump_path:
+                dump_path = menu_select_dump()
+                if not dump_path:
+                    continue
+            run_engine(dump_path, web_gui=True)
             pause()
 
         elif choice == '5':
-            menu_reinstall()
+            menu_update()
             pause()
 
         elif choice == '6':
+            menu_reinstall()
+            pause()
+
+        elif choice == '7':
             menu_info()
             pause()
 
@@ -563,6 +579,7 @@ def menu_info():
         "",
         f"  {C.BY}Tecnicas v4.0:{C.X}",
         f"    - GUI interactivo en CMD con 14 secciones",
+        f"    - Web Dashboard embebido (se abre en el navegador)",
         f"    - Deteccion de ofuscacion (10 patrones + entropia Shannon)",
         f"    - Analisis de natives por hash y nombre",
         f"    - Server callbacks (ESX, QBCore, ox_lib)",
@@ -596,7 +613,8 @@ def main():
             install_project()
         check_updates()
         no_gui = "--no-gui" in sys.argv
-        run_engine(sys.argv[1], no_gui=no_gui)
+        web_gui = "--web-gui" in sys.argv
+        run_engine(sys.argv[1], no_gui=no_gui, web_gui=web_gui)
         return
 
     # Modo interactivo
