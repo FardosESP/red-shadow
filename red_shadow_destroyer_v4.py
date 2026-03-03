@@ -1645,13 +1645,14 @@ def main():
         print(f"{C.R}  Uso: python red_shadow_destroyer_v4.py <ruta_dump> [opciones]{C.X}")
         print(f"{C.CN}  Ejemplo: python red_shadow_destroyer_v4.py C:\\FiveM_Dump{C.X}")
         print(f"{C.GR}  Opciones:{C.X}")
-        print(f"{C.GR}    --no-gui   Ejecutar sin menu interactivo (output directo){C.X}")
-        print(f"{C.GR}    --web-gui  Abrir resultados en dashboard web (navegador){C.X}")
+        print(f"{C.GR}    --no-gui   Ejecutar sin interfaz (output directo + exportar JSON){C.X}")
+        print(f"{C.GR}    --cmd-gui  Usar menu interactivo en terminal (legacy){C.X}")
+        print(f"{C.GR}    (default)  Abrir Web Dashboard en el navegador{C.X}")
         sys.exit(1)
 
     dump_path = sys.argv[1]
     no_gui = '--no-gui' in sys.argv
-    web_gui = '--web-gui' in sys.argv
+    cmd_gui = '--cmd-gui' in sys.argv
 
     if not os.path.exists(dump_path):
         print(f"{C.R}[!] Ruta no encontrada: {dump_path}{C.X}")
@@ -1669,21 +1670,21 @@ def main():
     # Ejecutar analisis completo
     engine.run_full_analysis()
 
-    if web_gui:
-        # Modo web: abrir dashboard en navegador
+    if no_gui:
+        # Modo directo: mostrar resumen y exportar
+        engine._view_summary()
+        engine._export_json()
+    elif cmd_gui:
+        # Modo legacy: menu interactivo en terminal
+        engine.interactive_menu()
+    else:
+        # Modo por defecto: Web Dashboard en navegador
         try:
             from web_gui import launch_web_gui
             launch_web_gui(engine, auto_open=True)
         except ImportError:
-            print(f"{C.R}[!] web_gui.py no encontrado. Asegurate de que esta en el mismo directorio.{C.X}")
-            sys.exit(1)
-    elif no_gui:
-        # Modo directo: mostrar resumen y exportar
-        engine._view_summary()
-        engine._export_json()
-    else:
-        # Modo interactivo: abrir menu GUI en CMD
-        engine.interactive_menu()
+            print(f"{C.R}[!] web_gui.py no encontrado. Usando menu de terminal como fallback...{C.X}")
+            engine.interactive_menu()
 
 
 if __name__ == '__main__':
