@@ -635,31 +635,51 @@ def main():
     if os.name == 'nt':
         os.system('chcp 65001 >nul 2>&1')
 
-    # Si se pasan argumentos, modo legacy compatible
-    if len(sys.argv) >= 2 and os.path.exists(sys.argv[1]):
-        clear()
-        print(BANNER)
-        check_deps()
-        if not check_install():
-            install_project()
-        check_updates()
-        no_gui = "--no-gui" in sys.argv
-        cmd_gui = "--cmd-gui" in sys.argv
-        run_engine(sys.argv[1], no_gui=no_gui, cmd_gui=cmd_gui)
-        return
+    print(BANNER)
 
-    # Modo interactivo
+    # Verificar dependencias e instalacion
     check_deps()
-
-    # Auto-instalar si no esta
     if not check_install():
-        clear()
-        print(BANNER)
-        print(f"\n{C.Y}  RED-SHADOW no esta instalado. Instalando...{C.X}\n")
+        log("Instalando RED-SHADOW...", "UPDATE")
         install_project()
 
-    # Abrir menu principal
-    main_menu()
+    # Comprobar actualizaciones silenciosamente
+    check_updates()
+
+    # Modo --no-gui: ejecutar analisis headless (sin interfaz)
+    if "--no-gui" in sys.argv:
+        dump_path = None
+        for arg in sys.argv[1:]:
+            if not arg.startswith("--") and os.path.exists(arg):
+                dump_path = arg
+                break
+        if dump_path:
+            run_engine(dump_path, no_gui=True)
+        else:
+            log("Modo --no-gui requiere ruta del dump: python main.py /ruta/dump --no-gui", "ERROR")
+        return
+
+    # Modo --cmd-gui: menu de terminal legacy
+    if "--cmd-gui" in sys.argv:
+        dump_path = None
+        for arg in sys.argv[1:]:
+            if not arg.startswith("--") and os.path.exists(arg):
+                dump_path = arg
+                break
+        if dump_path:
+            run_engine(dump_path, cmd_gui=True)
+        else:
+            main_menu()
+        return
+
+    # Modo por defecto: abrir Web Dashboard en el navegador
+    log("Iniciando Web Dashboard...", "INFO")
+    try:
+        from web_gui import launch_web_gui
+        launch_web_gui(auto_open=True)
+    except ImportError:
+        log("web_gui.py no encontrado. Usando menu de terminal como fallback.", "WARN")
+        main_menu()
 
 
 if __name__ == "__main__":
