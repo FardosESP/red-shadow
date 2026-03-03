@@ -18,6 +18,15 @@
 - Visualizacion categorizada de resultados
 - Exportacion a JSON y HTML
 
+### Web Dashboard Embebido (NUEVO)
+- Dashboard interactivo que se abre en el navegador
+- Servidor local sin dependencias externas (usa stdlib de Python)
+- Navegacion por pestanas: Resumen, Triggers, Honeypots, Anticheats, Ofuscacion, Natives, Callbacks, Seguridad, Manifests, Cadenas, Clones, Busqueda
+- Filtros en tiempo real y busqueda de triggers
+- Tema dark hacker con scanline effect
+- Descarga de reporte JSON desde el dashboard
+- Tambien puede abrir reportes JSON existentes
+
 ### Analisis de Triggers (Avanzado)
 - Deteccion de `RegisterNetEvent`, `AddEventHandler`, `TriggerServerEvent`, `TriggerClientEvent`, `RegisterServerEvent`, `RegisterCommand`
 - Contexto extendido (20 lineas antes/despues)
@@ -96,15 +105,22 @@ python main.py
 Se abrira el menu interactivo en la terminal donde puedes:
 1. Seleccionar la ruta del dump
 2. Ejecutar el analisis (con o sin GUI)
-3. Buscar actualizaciones
-4. Reinstalar/reparar la herramienta
+3. Abrir el analisis en el Web Dashboard (navegador)
+4. Buscar actualizaciones
+5. Reinstalar/reparar la herramienta
 
 El launcher se encarga de todo: instala el proyecto si no existe, verifica updates, y lanza el motor de analisis.
 
 ### Modo legacy (argumentos)
 ```bash
-python main.py /ruta/al/dump           # Analisis con GUI
-python main.py /ruta/al/dump --no-gui  # Analisis sin GUI
+python main.py /ruta/al/dump              # Analisis con GUI en CMD
+python main.py /ruta/al/dump --no-gui     # Analisis sin GUI (output directo)
+python main.py /ruta/al/dump --web-gui    # Analisis + Web Dashboard en navegador
+```
+
+### Abrir reporte existente en Web Dashboard
+```bash
+python web_gui.py reporte.json            # Abre un JSON de reporte en el navegador
 ```
 
 ## Estructura del Proyecto
@@ -113,6 +129,7 @@ python main.py /ruta/al/dump --no-gui  # Analisis sin GUI
 red-shadow/
   main.py                      # Launcher con auto-updater
   red_shadow_destroyer_v4.py   # v4.0 Advanced Forensic Engine
+  web_gui.py                   # Web Dashboard embebido (navegador)
   red_shadow_destroyer_v3.py   # v3.0 Terminal Hacker Edition
   red_shadow_destroyer_v2.py   # v2.0 Advanced Analysis Engine
   .version                     # Version tracking
