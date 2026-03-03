@@ -88,25 +88,23 @@ pip install colorama
 
 ## Uso
 
-### v4.0 - Con GUI interactivo (recomendado)
+Solo ejecuta:
 ```bash
-python red_shadow_destroyer_v4.py /ruta/al/dump
+python main.py
 ```
 
-### v4.0 - Sin GUI (output directo)
-```bash
-python red_shadow_destroyer_v4.py /ruta/al/dump --no-gui
-```
+Se abrira el menu interactivo en la terminal donde puedes:
+1. Seleccionar la ruta del dump
+2. Ejecutar el analisis (con o sin GUI)
+3. Buscar actualizaciones
+4. Reinstalar/reparar la herramienta
 
-### Launcher con auto-update
-```bash
-python main.py /ruta/al/dump
-```
+El launcher se encarga de todo: instala el proyecto si no existe, verifica updates, y lanza el motor de analisis.
 
-### Versiones anteriores
+### Modo legacy (argumentos)
 ```bash
-python red_shadow_destroyer_v3.py /ruta/al/dump
-python red_shadow_destroyer_v2.py /ruta/al/dump
+python main.py /ruta/al/dump           # Analisis con GUI
+python main.py /ruta/al/dump --no-gui  # Analisis sin GUI
 ```
 
 ## Estructura del Proyecto

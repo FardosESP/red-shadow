@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-RED-SHADOW Main Launcher / Installer / Auto-Updater
-- Si el proyecto no esta descargado: clona el repositorio completo
-- Si ya esta descargado: verifica actualizaciones y aplica cambios
-- Lanza el motor de analisis seleccionado
+RED-SHADOW v4.0 - Advanced Forensic Engine
+Launcher interactivo completo - Solo ejecuta: python main.py
+Todo se maneja desde la terminal.
 """
 
 import os
@@ -29,56 +28,54 @@ GITHUB_REPO = "FardosESP/red-shadow"
 GITHUB_API = f"https://api.github.com/repos/{GITHUB_REPO}"
 GITHUB_RAW = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main"
 
-# Directorio donde se instala el proyecto
 INSTALL_DIR = Path(__file__).parent.resolve()
 VERSION_FILE = INSTALL_DIR / ".version"
 
-# Archivos del proyecto que se descargan/actualizan
 PROJECT_FILES = [
     "red_shadow_destroyer_v4.py",
     "red_shadow_destroyer_v3.py",
     "red_shadow_destroyer_v2.py",
+    "main.py",
     "README.md",
     ".version",
 ]
 
-# Motor principal (v4 por defecto)
-DEFAULT_ENGINE = "red_shadow_destroyer_v4.py"
-
 # ============================================================================
-# COLORES (sin dependencias externas)
+# COLORES ANSI (sin dependencias)
 # ============================================================================
 
-class Col:
-    """Colores ANSI que funcionan en Windows 10+ y Linux/Mac"""
-    R = "\033[91m"    # rojo
-    G = "\033[92m"    # verde
-    Y = "\033[93m"    # amarillo
-    C = "\033[96m"    # cyan
-    M = "\033[95m"    # magenta
-    W = "\033[97m"    # blanco
-    GR = "\033[90m"   # gris
-    B = "\033[1m"     # bold
-    X = "\033[0m"     # reset
+class C:
+    R = "\033[91m"
+    G = "\033[92m"
+    Y = "\033[93m"
+    CN = "\033[96m"
+    M = "\033[95m"
+    W = "\033[97m"
+    GR = "\033[90m"
+    B = "\033[1m"
+    X = "\033[0m"
+    BR = "\033[91m\033[1m"
+    BG = "\033[92m\033[1m"
+    BY = "\033[93m\033[1m"
+    BC = "\033[96m\033[1m"
 
 
-# Habilitar colores ANSI en Windows
 if os.name == 'nt':
     try:
         import ctypes
         kernel32 = ctypes.windll.kernel32
         kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
     except Exception:
-        # Fallback: sin colores
-        for attr in ['R', 'G', 'Y', 'C', 'M', 'W', 'GR', 'B', 'X']:
-            setattr(Col, attr, '')
+        for attr in dir(C):
+            if not attr.startswith('_'):
+                setattr(C, attr, '')
 
 
 # ============================================================================
 # BANNER
 # ============================================================================
 
-BANNER = f"""{Col.R}
+BANNER = f"""{C.BR}
  ########  ######## ########           ######  ##     ##    ###    ########   #######  ##      ##
  ##     ## ##       ##     ##         ##    ## ##     ##   ## ##   ##     ## ##     ## ##  ##  ##
  ##     ## ##       ##     ##         ##       ##     ##  ##   ##  ##     ## ##     ## ##  ##  ##
@@ -86,48 +83,81 @@ BANNER = f"""{Col.R}
  ##   ##   ##       ##     ##               ## ##     ## ######### ##     ## ##     ## ##  ##  ##
  ##    ##  ##       ##     ##         ##    ## ##     ## ##     ## ##     ## ##     ##  ##  ##  ##
  ##     ## ######## ########           ######  ##     ## ##     ## ########   #######    ###  ###
-{Col.X}
-{Col.Y}{Col.B}              RED-SHADOW Launcher / Installer / Auto-Updater{Col.X}
-{Col.GR}              github.com/{GITHUB_REPO}{Col.X}
+{C.X}
+{C.BY}              RED-SHADOW "Destroyer" v4.0 - Advanced Forensic Engine{C.X}
+{C.GR}              FiveM / redENGINE Dump Analysis | github.com/FardosESP{C.X}
 """
 
+SEP = f"{C.CN}{'=' * 75}{C.X}"
+SUBSEP = f"{C.GR}{'-' * 75}{C.X}"
 
-# ============================================================================
-# UTILIDADES
-# ============================================================================
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 
 def log(msg, level="INFO"):
-    colors = {"INFO": Col.C, "OK": Col.G, "WARN": Col.Y, "ERROR": Col.R, "UPDATE": Col.M}
-    color = colors.get(level, Col.W)
+    colors = {"INFO": C.CN, "OK": C.G, "WARN": C.Y, "ERROR": C.R, "UPDATE": C.M}
+    color = colors.get(level, C.W)
     ts = datetime.now().strftime("%H:%M:%S")
-    print(f"{color}[{ts}] [{level:6}] {msg}{Col.X}")
+    print(f"{color}[{ts}] [{level:6}] {msg}{C.X}")
 
+
+def prompt(text=""):
+    try:
+        return input(f"{C.BY}  {text}> {C.X}").strip()
+    except (EOFError, KeyboardInterrupt):
+        return ""
+
+
+def pause():
+    try:
+        input(f"\n{C.GR}  Presiona ENTER para continuar...{C.X}")
+    except (EOFError, KeyboardInterrupt):
+        pass
+
+
+def box(title, lines, width=73, color=C.CN):
+    """Caja ASCII"""
+    out = []
+    out.append(f"{color}+{'-' * width}+{C.X}")
+    out.append(f"{color}| {C.B}{title:<{width - 2}}{C.X}{color} |{C.X}")
+    out.append(f"{color}+{'-' * width}+{C.X}")
+    for line in lines:
+        clean = len(line) - len(line.encode('unicode_escape').decode('ascii')) + len(line)
+        # Simple padding - just use the line as-is with minimal padding
+        out.append(f"{color}|{C.X} {line}")
+    out.append(f"{color}+{'-' * width}+{C.X}")
+    return '\n'.join(out)
+
+
+# ============================================================================
+# UPDATER / INSTALLER
+# ============================================================================
 
 def download_file(url, dest):
-    """Descargar un archivo desde una URL"""
     try:
         urllib.request.urlretrieve(url, dest)
         return True
     except Exception as e:
-        log(f"Error descargando {url}: {e}", "ERROR")
+        log(f"Error descargando: {e}", "ERROR")
         return False
 
 
-def get_remote_file_content(filename):
-    """Obtener contenido de un archivo del repositorio"""
+def get_remote_content(filename):
     url = f"{GITHUB_RAW}/{filename}"
     try:
-        with urllib.request.urlopen(url, timeout=10) as resp:
+        req = urllib.request.Request(url, headers={"User-Agent": "RED-SHADOW"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
             return resp.read()
     except Exception:
         return None
 
 
 def get_latest_commit():
-    """Obtener SHA del ultimo commit en main"""
     try:
         url = f"{GITHUB_API}/commits/main"
-        req = urllib.request.Request(url, headers={"User-Agent": "RED-SHADOW-Updater"})
+        req = urllib.request.Request(url, headers={"User-Agent": "RED-SHADOW"})
         with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read())
             return data.get("sha", "")
@@ -136,7 +166,6 @@ def get_latest_commit():
 
 
 def get_local_version():
-    """Leer version local"""
     if VERSION_FILE.exists():
         try:
             with open(VERSION_FILE, 'r') as f:
@@ -147,18 +176,12 @@ def get_local_version():
 
 
 def save_local_version(version, commit):
-    """Guardar version local"""
     with open(VERSION_FILE, 'w') as f:
-        json.dump({
-            "version": version,
-            "commit": commit,
-            "updated": datetime.now().isoformat(),
-        }, f, indent=2)
+        json.dump({"version": version, "commit": commit, "updated": datetime.now().isoformat()}, f, indent=2)
 
 
 def file_hash(filepath):
-    """Calcular hash MD5 de un archivo"""
-    if not filepath.exists():
+    if not Path(filepath).exists():
         return None
     h = hashlib.md5()
     with open(filepath, 'rb') as f:
@@ -168,7 +191,6 @@ def file_hash(filepath):
 
 
 def has_git():
-    """Verificar si git esta instalado"""
     try:
         subprocess.run(["git", "--version"], capture_output=True, check=True)
         return True
@@ -177,32 +199,25 @@ def has_git():
 
 
 def is_git_repo():
-    """Verificar si el directorio actual es un repo git"""
     return (INSTALL_DIR / ".git").exists()
 
 
-# ============================================================================
-# INSTALADOR: Descarga el proyecto completo si no existe
-# ============================================================================
+def check_install():
+    """Verificar si el motor v4 esta instalado"""
+    return (INSTALL_DIR / "red_shadow_destroyer_v4.py").exists()
+
 
 def install_project():
-    """Instalar el proyecto desde cero"""
-    print(f"\n{Col.Y}{Col.B}  === INSTALACION DE RED-SHADOW ==={Col.X}\n")
+    """Instalar el proyecto completo"""
+    log("Descargando RED-SHADOW desde GitHub...", "UPDATE")
 
-    # Opcion 1: Clonar con git
-    if has_git():
-        log("Git detectado. Clonando repositorio...", "UPDATE")
-        clone_url = f"https://github.com/{GITHUB_REPO}.git"
-
+    if has_git() and not is_git_repo():
+        log("Clonando repositorio con git...", "UPDATE")
         try:
-            subprocess.run(
-                ["git", "clone", clone_url, str(INSTALL_DIR / "_temp_clone")],
-                check=True, capture_output=True
-            )
-
-            # Mover archivos del clone al directorio actual
-            temp_dir = INSTALL_DIR / "_temp_clone"
-            for item in temp_dir.iterdir():
+            temp = INSTALL_DIR / "_temp_clone"
+            subprocess.run(["git", "clone", f"https://github.com/{GITHUB_REPO}.git", str(temp)],
+                           check=True, capture_output=True)
+            for item in temp.iterdir():
                 dest = INSTALL_DIR / item.name
                 if item.name == ".git":
                     if not (INSTALL_DIR / ".git").exists():
@@ -213,312 +228,397 @@ def install_project():
                     if dest.exists():
                         shutil.rmtree(str(dest))
                     shutil.copytree(str(item), str(dest))
-
-            shutil.rmtree(str(temp_dir), ignore_errors=True)
+            shutil.rmtree(str(temp), ignore_errors=True)
             log("Repositorio clonado correctamente", "OK")
             return True
+        except Exception as e:
+            log(f"Error clonando: {e}. Descarga directa...", "WARN")
+            temp = INSTALL_DIR / "_temp_clone"
+            if temp.exists():
+                shutil.rmtree(str(temp), ignore_errors=True)
 
-        except subprocess.CalledProcessError as e:
-            log(f"Error clonando: {e}", "WARN")
-            log("Intentando descarga directa...", "INFO")
-            # Limpiar temp
-            temp_dir = INSTALL_DIR / "_temp_clone"
-            if temp_dir.exists():
-                shutil.rmtree(str(temp_dir), ignore_errors=True)
-
-    # Opcion 2: Descarga directa de archivos (sin git)
-    log("Descargando archivos del proyecto...", "UPDATE")
-
-    success_count = 0
-    for filename in PROJECT_FILES:
-        dest = INSTALL_DIR / filename
-        url = f"{GITHUB_RAW}/{filename}"
-        log(f"  Descargando {filename}...", "INFO")
-
+    # Descarga directa
+    ok = 0
+    for fname in PROJECT_FILES:
+        if fname == "main.py":
+            continue  # No sobreescribir el launcher en ejecucion
+        dest = INSTALL_DIR / fname
+        url = f"{GITHUB_RAW}/{fname}"
         if download_file(url, str(dest)):
-            success_count += 1
-            log(f"  {filename} descargado", "OK")
-        else:
-            log(f"  Error descargando {filename}", "ERROR")
+            ok += 1
+            log(f"  {fname} OK", "OK")
 
-    # Descargar tambien main.py (este archivo) si no existe
-    main_url = f"{GITHUB_RAW}/main.py"
-    main_dest = INSTALL_DIR / "main.py"
-    # No sobreescribir main.py si ya estamos ejecutando desde el
-    # Solo descargar los demas archivos
-
-    if success_count > 0:
-        log(f"{success_count}/{len(PROJECT_FILES)} archivos descargados", "OK")
-
-        # Guardar version
-        remote_commit = get_latest_commit()
-        if remote_commit:
-            save_local_version("4.0", remote_commit)
-
+    if ok > 0:
+        commit = get_latest_commit()
+        if commit:
+            save_local_version("4.0", commit)
+        log(f"Instalacion completada ({ok} archivos)", "OK")
         return True
-    else:
-        log("No se pudo descargar ningun archivo", "ERROR")
-        return False
+
+    log("Instalacion fallida", "ERROR")
+    return False
 
 
-# ============================================================================
-# ACTUALIZADOR: Compara y aplica cambios
-# ============================================================================
-
-def check_and_update():
-    """Verificar actualizaciones y aplicar cambios si los hay"""
-    print(f"\n{Col.C}  === VERIFICANDO ACTUALIZACIONES ==={Col.X}\n")
-
+def check_updates():
+    """Verificar y aplicar actualizaciones"""
     local_info = get_local_version()
     local_commit = local_info.get("commit", "")
-    local_version = local_info.get("version", "unknown")
 
-    log(f"Version local: {local_version} (commit: {local_commit[:8] if local_commit else 'N/A'})", "INFO")
+    log(f"Version local: {local_info.get('version', '?')}", "INFO")
 
-    # Opcion 1: Actualizar con git pull
+    # Git pull si es repo
     if is_git_repo() and has_git():
-        log("Repositorio git detectado. Ejecutando git pull...", "UPDATE")
         try:
-            result = subprocess.run(
-                ["git", "pull", "origin", "main"],
-                cwd=str(INSTALL_DIR),
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            output = result.stdout.strip()
-            if "Already up to date" in output or "Already up-to-date" in output:
-                log("Ya tienes la ultima version", "OK")
+            result = subprocess.run(["git", "pull", "origin", "main"],
+                                    cwd=str(INSTALL_DIR), capture_output=True, text=True, check=True)
+            if "Already up to date" in result.stdout or "Already up-to-date" in result.stdout:
+                log("Sin actualizaciones", "OK")
                 return False
             else:
-                log("Actualizacion aplicada via git pull", "OK")
-                # Actualizar version local
-                remote_commit = get_latest_commit()
-                if remote_commit:
-                    # Leer version del .version remoto
+                log("Actualizacion aplicada via git", "OK")
+                commit = get_latest_commit()
+                if commit:
                     new_info = get_local_version()
-                    save_local_version(new_info.get("version", local_version), remote_commit)
+                    save_local_version(new_info.get("version", "4.0"), commit)
                 return True
+        except Exception:
+            pass
 
-        except subprocess.CalledProcessError:
-            log("Error en git pull. Intentando actualizacion directa...", "WARN")
-
-    # Opcion 2: Comparar hashes de archivos y descargar los que cambiaron
-    log("Comparando archivos con el repositorio remoto...", "UPDATE")
-
+    # Comparacion por hash
     remote_commit = get_latest_commit()
     if not remote_commit:
-        log("No se pudo conectar a GitHub. Saltando actualizacion.", "WARN")
+        log("Sin conexion a GitHub", "WARN")
         return False
 
     if local_commit == remote_commit:
-        log("Ya tienes la ultima version", "OK")
+        log("Sin actualizaciones", "OK")
         return False
 
-    log(f"Nueva version disponible (commit: {remote_commit[:8]})", "UPDATE")
-
-    updated_count = 0
-    for filename in PROJECT_FILES:
-        local_path = INSTALL_DIR / filename
-
-        # Descargar version remota
-        remote_content = get_remote_file_content(filename)
-        if remote_content is None:
+    log("Nueva version disponible. Actualizando...", "UPDATE")
+    updated = 0
+    for fname in PROJECT_FILES:
+        remote = get_remote_content(fname)
+        if remote is None:
             continue
-
-        # Comparar con local
-        remote_hash = hashlib.md5(remote_content).hexdigest()
-        local_md5 = file_hash(local_path)
-
-        if local_md5 != remote_hash:
-            log(f"  Actualizando {filename}...", "UPDATE")
+        rh = hashlib.md5(remote).hexdigest()
+        lh = file_hash(INSTALL_DIR / fname)
+        if rh != lh:
             try:
-                with open(local_path, 'wb') as f:
-                    f.write(remote_content)
-                updated_count += 1
-                log(f"  {filename} actualizado", "OK")
-            except Exception as e:
-                log(f"  Error escribiendo {filename}: {e}", "ERROR")
-        else:
-            log(f"  {filename} sin cambios", "INFO")
+                with open(INSTALL_DIR / fname, 'wb') as f:
+                    f.write(remote)
+                updated += 1
+                log(f"  {fname} actualizado", "OK")
+            except Exception:
+                pass
 
-    # Actualizar main.py tambien (el propio launcher)
-    main_remote = get_remote_file_content("main.py")
-    if main_remote:
-        main_hash = hashlib.md5(main_remote).hexdigest()
-        main_local_hash = file_hash(INSTALL_DIR / "main.py")
-        if main_hash != main_local_hash:
-            log("  Actualizando main.py (launcher)...", "UPDATE")
-            try:
-                with open(INSTALL_DIR / "main.py", 'wb') as f:
-                    f.write(main_remote)
-                updated_count += 1
-                log("  main.py actualizado. Reinicia el launcher para usar la nueva version.", "WARN")
-            except Exception as e:
-                log(f"  Error actualizando main.py: {e}", "ERROR")
-
-    if updated_count > 0:
+    if updated > 0:
         save_local_version(get_local_version().get("version", "4.0"), remote_commit)
-        log(f"{updated_count} archivos actualizados", "OK")
-        return True
-    else:
-        save_local_version(local_version, remote_commit)
-        log("Todos los archivos estan al dia", "OK")
-        return False
+        log(f"{updated} archivos actualizados", "OK")
+        if "main.py" in [f for f in PROJECT_FILES]:
+            log("Launcher actualizado. Reinicia para usar la nueva version.", "WARN")
+    return updated > 0
 
 
-# ============================================================================
-# SELECTOR DE VERSION
-# ============================================================================
-
-def select_and_run(dump_path, extra_args=None):
-    """Seleccionar version del motor y ejecutar"""
-    engines = [
-        ("red_shadow_destroyer_v4.py", "v4.0 Advanced Forensic Engine (GUI interactivo)"),
-        ("red_shadow_destroyer_v3.py", "v3.0 Terminal Hacker Edition"),
-        ("red_shadow_destroyer_v2.py", "v2.0 Advanced Analysis Engine"),
-    ]
-
-    available = []
-    for eng_file, desc in engines:
-        if (INSTALL_DIR / eng_file).exists():
-            available.append((eng_file, desc))
-
-    if not available:
-        log("No se encontro ningun motor de analisis. Ejecuta la instalacion primero.", "ERROR")
-        sys.exit(1)
-
-    # Si solo hay uno, usarlo directamente
-    if len(available) == 1:
-        selected = available[0][0]
-    else:
-        print(f"\n{Col.Y}{Col.B}  Selecciona el motor de analisis:{Col.X}\n")
-        for i, (eng_file, desc) in enumerate(available, 1):
-            default_tag = f" {Col.G}(recomendado){Col.X}" if eng_file == DEFAULT_ENGINE else ""
-            print(f"  {Col.C}[{i}]{Col.X} {desc}{default_tag}")
-
-        print(f"\n  {Col.GR}Presiona ENTER para usar el motor recomendado{Col.X}")
-
+def check_deps():
+    """Instalar colorama si falta"""
+    try:
+        import colorama
+    except ImportError:
+        log("Instalando colorama...", "UPDATE")
         try:
-            choice = input(f"\n{Col.Y}  > {Col.X}").strip()
-        except (EOFError, KeyboardInterrupt):
-            choice = ""
+            subprocess.run([sys.executable, "-m", "pip", "install", "colorama", "--quiet"],
+                           check=True, capture_output=True)
+            log("colorama instalado", "OK")
+        except Exception:
+            log("Instala manualmente: pip install colorama", "WARN")
 
-        if choice == "" or not choice.isdigit():
-            selected = DEFAULT_ENGINE if (INSTALL_DIR / DEFAULT_ENGINE).exists() else available[0][0]
-        else:
-            idx = int(choice) - 1
-            if 0 <= idx < len(available):
-                selected = available[idx][0]
-            else:
-                selected = available[0][0]
 
-    # Ejecutar
-    script_path = INSTALL_DIR / selected
-    log(f"Ejecutando {selected}...", "OK")
+# ============================================================================
+# MOTOR DE ANALISIS (importado dinamicamente)
+# ============================================================================
 
-    cmd = [sys.executable, str(script_path), dump_path]
-    if extra_args:
-        cmd.extend(extra_args)
+def run_engine(dump_path, no_gui=False):
+    """Ejecutar el motor de analisis v4"""
+    engine_path = INSTALL_DIR / "red_shadow_destroyer_v4.py"
+    if not engine_path.exists():
+        log("Motor v4 no encontrado. Reinstala con la opcion del menu.", "ERROR")
+        return
+
+    cmd = [sys.executable, str(engine_path), dump_path]
+    if no_gui:
+        cmd.append("--no-gui")
 
     try:
         subprocess.run(cmd, check=False)
     except Exception as e:
-        log(f"Error ejecutando {selected}: {e}", "ERROR")
-        sys.exit(1)
+        log(f"Error ejecutando motor: {e}", "ERROR")
 
 
 # ============================================================================
-# INSTALACION DE DEPENDENCIAS
+# MENU PRINCIPAL INTERACTIVO
 # ============================================================================
 
-def check_dependencies():
-    """Verificar e instalar dependencias necesarias"""
-    try:
-        import colorama
-    except ImportError:
-        log("Instalando dependencia: colorama...", "UPDATE")
-        try:
-            subprocess.run(
-                [sys.executable, "-m", "pip", "install", "colorama", "--quiet"],
-                check=True, capture_output=True
-            )
-            log("colorama instalado correctamente", "OK")
-        except Exception:
-            log("No se pudo instalar colorama. Instala manualmente: pip install colorama", "WARN")
+def main_menu():
+    """Menu principal interactivo - todo se gestiona desde aqui"""
+    dump_path = None
+    last_analysis = None
+
+    while True:
+        clear()
+        print(BANNER)
+        print(SEP)
+
+        # Estado actual
+        version_info = get_local_version()
+        installed = check_install()
+
+        status_lines = []
+        if installed:
+            status_lines.append(f"  {C.G}[INSTALADO]{C.X} RED-SHADOW v{version_info.get('version', '?')}")
+            status_lines.append(f"  {C.GR}Ultima actualizacion: {version_info.get('updated', 'N/A')}{C.X}")
+        else:
+            status_lines.append(f"  {C.R}[NO INSTALADO]{C.X} Motor de analisis no encontrado")
+
+        if dump_path:
+            status_lines.append(f"  {C.CN}Dump cargado: {dump_path}{C.X}")
+        else:
+            status_lines.append(f"  {C.Y}Dump: No seleccionado{C.X}")
+
+        for line in status_lines:
+            print(line)
+
+        print(f"\n{SEP}")
+
+        # Menu
+        print(f"""
+  {C.BC}[1]{C.X} Seleccionar ruta del dump
+  {C.BC}[2]{C.X} Ejecutar analisis completo (GUI interactivo)
+  {C.BC}[3]{C.X} Ejecutar analisis rapido (sin GUI)
+  {C.BC}[4]{C.X} Buscar actualizaciones
+  {C.BC}[5]{C.X} Reinstalar / Reparar herramienta
+  {C.BC}[6]{C.X} Informacion del proyecto
+  {C.BC}[0]{C.X} Salir
+""")
+
+        choice = prompt("Opcion")
+
+        if choice == '0':
+            print(f"\n{C.GR}  Hasta luego.{C.X}\n")
+            break
+
+        elif choice == '1':
+            dump_path = menu_select_dump()
+
+        elif choice == '2':
+            if not installed:
+                log("Motor no instalado. Usa la opcion 5 para instalar.", "ERROR")
+                pause()
+                continue
+            if not dump_path:
+                # Pedir ruta directamente
+                dump_path = menu_select_dump()
+                if not dump_path:
+                    continue
+            run_engine(dump_path, no_gui=False)
+            pause()
+
+        elif choice == '3':
+            if not installed:
+                log("Motor no instalado. Usa la opcion 5 para instalar.", "ERROR")
+                pause()
+                continue
+            if not dump_path:
+                dump_path = menu_select_dump()
+                if not dump_path:
+                    continue
+            run_engine(dump_path, no_gui=True)
+            pause()
+
+        elif choice == '4':
+            menu_update()
+            pause()
+
+        elif choice == '5':
+            menu_reinstall()
+            pause()
+
+        elif choice == '6':
+            menu_info()
+            pause()
+
+        else:
+            log("Opcion no valida", "WARN")
+            pause()
+
+
+def menu_select_dump():
+    """Menu para seleccionar la ruta del dump"""
+    clear()
+    print(BANNER)
+    print(f"\n{C.BY}  === SELECCIONAR RUTA DEL DUMP ==={C.X}\n")
+    print(f"  {C.W}Escribe la ruta completa de la carpeta del dump de FiveM.{C.X}")
+    print(f"  {C.GR}Ejemplo: C:\\Users\\user\\Desktop\\FiveM_Dump{C.X}")
+    print(f"  {C.GR}Ejemplo: /home/user/dumps/server1{C.X}")
+    print(f"  {C.GR}Escribe 'cancel' para volver al menu{C.X}\n")
+
+    path = prompt("Ruta del dump")
+
+    if not path or path.lower() == 'cancel':
+        return None
+
+    # Expandir ~ y resolver
+    path = os.path.expanduser(path)
+    path = os.path.abspath(path)
+
+    if not os.path.exists(path):
+        log(f"Ruta no encontrada: {path}", "ERROR")
+        print(f"\n  {C.Y}Quieres crear la carpeta? (s/n){C.X}")
+        resp = prompt("")
+        if resp.lower() == 's':
+            try:
+                os.makedirs(path, exist_ok=True)
+                log(f"Carpeta creada: {path}", "OK")
+            except Exception as e:
+                log(f"Error creando carpeta: {e}", "ERROR")
+                pause()
+                return None
+        else:
+            pause()
+            return None
+
+    if not os.path.isdir(path):
+        log("La ruta debe ser un directorio, no un archivo", "ERROR")
+        pause()
+        return None
+
+    # Verificar que hay archivos Lua
+    lua_count = len(list(Path(path).rglob("*.lua")))
+    if lua_count == 0:
+        log(f"No se encontraron archivos .lua en {path}", "WARN")
+        print(f"  {C.Y}Continuar de todos modos? (s/n){C.X}")
+        resp = prompt("")
+        if resp.lower() != 's':
+            return None
+
+    log(f"Dump seleccionado: {path} ({lua_count} archivos Lua)", "OK")
+    pause()
+    return path
+
+
+def menu_update():
+    """Menu de actualizaciones"""
+    clear()
+    print(BANNER)
+    print(f"\n{C.BY}  === BUSCAR ACTUALIZACIONES ==={C.X}\n")
+    check_deps()
+    check_updates()
+
+
+def menu_reinstall():
+    """Reinstalar/reparar"""
+    clear()
+    print(BANNER)
+    print(f"\n{C.BY}  === REINSTALAR / REPARAR ==={C.X}\n")
+    print(f"  {C.W}Esto descargara todos los archivos del proyecto desde GitHub.{C.X}")
+    print(f"  {C.Y}Los archivos existentes seran sobreescritos.{C.X}\n")
+
+    resp = prompt("Continuar? (s/n)")
+    if resp.lower() != 's':
+        return
+
+    check_deps()
+    install_project()
+
+
+def menu_info():
+    """Info del proyecto"""
+    clear()
+    print(BANNER)
+
+    info = get_local_version()
+    installed = check_install()
+
+    lines = [
+        f"  {C.W}Proyecto:    {C.CN}RED-SHADOW - FiveM Dump Analysis Engine{C.X}",
+        f"  {C.W}Repositorio: {C.CN}github.com/{GITHUB_REPO}{C.X}",
+        f"  {C.W}Version:     {C.G}{info.get('version', 'N/A')}{C.X}",
+        f"  {C.W}Commit:      {C.GR}{info.get('commit', 'N/A')[:12]}{C.X}",
+        f"  {C.W}Actualizado: {C.GR}{info.get('updated', 'N/A')}{C.X}",
+        f"  {C.W}Instalado:   {C.G if installed else C.R}{'Si' if installed else 'No'}{C.X}",
+        "",
+        f"  {C.BY}Motores disponibles:{C.X}",
+    ]
+
+    engines = [
+        ("red_shadow_destroyer_v4.py", "v4.0 Advanced Forensic Engine"),
+        ("red_shadow_destroyer_v3.py", "v3.0 Terminal Hacker Edition"),
+        ("red_shadow_destroyer_v2.py", "v2.0 Advanced Analysis Engine"),
+    ]
+    for eng, desc in engines:
+        exists = (INSTALL_DIR / eng).exists()
+        status = f"{C.G}OK{C.X}" if exists else f"{C.R}NO{C.X}"
+        lines.append(f"    [{status}] {desc}")
+
+    lines.extend([
+        "",
+        f"  {C.BY}Tecnicas v4.0:{C.X}",
+        f"    - GUI interactivo en CMD con 14 secciones",
+        f"    - Deteccion de ofuscacion (10 patrones + entropia Shannon)",
+        f"    - Analisis de natives por hash y nombre",
+        f"    - Server callbacks (ESX, QBCore, ox_lib)",
+        f"    - Fingerprinting anticheats (21+ firmas)",
+        f"    - Vulnerabilidades: SQL injection, token leaks, credentials",
+        f"    - Cadenas de triggers cross-file (DFS)",
+        f"    - Deteccion de codigo duplicado (MD5 blocks)",
+        f"    - Resource manifest parsing",
+        f"    - Exportacion JSON + HTML",
+    ])
+
+    for line in lines:
+        print(line)
 
 
 # ============================================================================
-# MAIN
+# ENTRY POINT
 # ============================================================================
 
 def main():
-    print(BANNER)
+    # Habilitar UTF-8 en Windows
+    if os.name == 'nt':
+        os.system('chcp 65001 >nul 2>&1')
 
-    # Verificar dependencias
-    check_dependencies()
+    # Si se pasan argumentos, modo legacy compatible
+    if len(sys.argv) >= 2 and os.path.exists(sys.argv[1]):
+        clear()
+        print(BANNER)
+        check_deps()
+        if not check_install():
+            install_project()
+        check_updates()
+        no_gui = "--no-gui" in sys.argv
+        run_engine(sys.argv[1], no_gui=no_gui)
+        return
 
-    # Determinar modo de ejecucion
-    engine_exists = (INSTALL_DIR / DEFAULT_ENGINE).exists()
-    has_args = len(sys.argv) >= 2
+    # Modo interactivo
+    check_deps()
 
-    # Caso 1: No hay motor instalado -> instalar
-    if not engine_exists:
-        log("RED-SHADOW no esta instalado. Iniciando instalacion...", "UPDATE")
-        success = install_project()
-        if not success:
-            log("Instalacion fallida. Verifica tu conexion a internet.", "ERROR")
-            sys.exit(1)
-        log("Instalacion completada.", "OK")
+    # Auto-instalar si no esta
+    if not check_install():
+        clear()
+        print(BANNER)
+        print(f"\n{C.Y}  RED-SHADOW no esta instalado. Instalando...{C.X}\n")
+        install_project()
 
-        if not has_args:
-            print(f"\n{Col.G}  RED-SHADOW instalado correctamente.{Col.X}")
-            print(f"{Col.C}  Uso: python main.py <ruta_dump>{Col.X}")
-            print(f"{Col.C}  Ejemplo: python main.py C:\\FiveM_Dump{Col.X}")
-            sys.exit(0)
-
-    # Caso 2: Ya instalado -> verificar updates
-    else:
-        no_update = "--no-update" in sys.argv
-        if not no_update:
-            check_and_update()
-
-    # Caso 3: Sin argumentos -> mostrar ayuda
-    if not has_args:
-        version_info = get_local_version()
-        print(f"\n{Col.W}  Version instalada: {Col.G}{version_info.get('version', 'unknown')}{Col.X}")
-        print(f"{Col.W}  Ultima actualizacion: {Col.GR}{version_info.get('updated', 'N/A')}{Col.X}")
-        print(f"\n{Col.R}  Uso: python main.py <ruta_dump> [opciones]{Col.X}")
-        print(f"{Col.C}  Ejemplo: python main.py C:\\FiveM_Dump{Col.X}")
-        print(f"\n{Col.W}  Opciones:{Col.X}")
-        print(f"  {Col.GR}--no-update    Saltar verificacion de actualizaciones{Col.X}")
-        print(f"  {Col.GR}--no-gui       Ejecutar sin menu interactivo (v4){Col.X}")
-        print()
-        sys.exit(0)
-
-    # Caso 4: Con ruta de dump -> ejecutar analisis
-    dump_path = sys.argv[1]
-
-    if dump_path in ("--no-update", "--no-gui", "--help", "-h"):
-        print(f"{Col.R}  Uso: python main.py <ruta_dump>{Col.X}")
-        sys.exit(1)
-
-    if not os.path.exists(dump_path):
-        log(f"Ruta no encontrada: {dump_path}", "ERROR")
-        sys.exit(1)
-
-    # Extraer argumentos extra
-    extra_args = [a for a in sys.argv[2:] if a != "--no-update"]
-
-    select_and_run(dump_path, extra_args)
+    # Abrir menu principal
+    main_menu()
 
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print(f"\n{Col.Y}[!] Interrupcion del usuario{Col.X}")
+        print(f"\n{C.Y}[!] Interrupcion del usuario{C.X}")
         sys.exit(0)
     except Exception as e:
-        print(f"\n{Col.R}[!] Error fatal: {e}{Col.X}")
+        print(f"\n{C.R}[!] Error fatal: {e}{C.X}")
         sys.exit(1)
