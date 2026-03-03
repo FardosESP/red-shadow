@@ -166,6 +166,19 @@ def get_latest_commit():
         return None
 
 
+def get_remote_file_list():
+    """Obtener la lista de archivos del repositorio remoto via GitHub API"""
+    try:
+        url = f"{GITHUB_API}/contents/"
+        req = urllib.request.Request(url, headers={"User-Agent": "RED-SHADOW"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+            # Solo archivos de nivel raiz (no directorios)
+            return [item["name"] for item in data if item["type"] == "file"]
+    except Exception:
+        return None
+
+
 def get_local_version():
     if VERSION_FILE.exists():
         try:
@@ -238,9 +251,16 @@ def install_project():
             if temp.exists():
                 shutil.rmtree(str(temp), ignore_errors=True)
 
-    # Descarga directa
+    # Descarga directa: combinar lista local + archivos remotos
+    files_to_download = list(PROJECT_FILES)
+    remote_files = get_remote_file_list()
+    if remote_files:
+        for rf in remote_files:
+            if rf not in files_to_download:
+                files_to_download.append(rf)
+
     ok = 0
-    for fname in PROJECT_FILES:
+    for fname in files_to_download:
         if fname == "main.py":
             continue  # No sobreescribir el launcher en ejecucion
         dest = INSTALL_DIR / fname
@@ -296,8 +316,19 @@ def check_updates():
         return False
 
     log("Nueva version disponible. Actualizando...", "UPDATE")
+
+    # Construir lista completa de archivos a actualizar:
+    # combinar PROJECT_FILES local + archivos remotos del repo
+    files_to_check = list(PROJECT_FILES)
+    remote_files = get_remote_file_list()
+    if remote_files:
+        for rf in remote_files:
+            if rf not in files_to_check:
+                files_to_check.append(rf)
+                log(f"  Nuevo archivo detectado en remoto: {rf}", "UPDATE")
+
     updated = 0
-    for fname in PROJECT_FILES:
+    for fname in files_to_check:
         remote = get_remote_content(fname)
         if remote is None:
             continue
@@ -315,7 +346,7 @@ def check_updates():
     if updated > 0:
         save_local_version(get_local_version().get("version", "4.0"), remote_commit)
         log(f"{updated} archivos actualizados", "OK")
-        if "main.py" in [f for f in PROJECT_FILES]:
+        if "main.py" in [f for f in files_to_check]:
             log("Launcher actualizado. Reinicia para usar la nueva version.", "WARN")
     return updated > 0
 
