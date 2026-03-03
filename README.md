@@ -102,25 +102,24 @@ Solo ejecuta:
 python main.py
 ```
 
-Se abrira el menu interactivo en la terminal donde puedes:
-1. Seleccionar la ruta del dump
-2. Ejecutar el analisis (con o sin GUI)
-3. Abrir el analisis en el Web Dashboard (navegador)
-4. Buscar actualizaciones
-5. Reinstalar/reparar la herramienta
+Se abrira automaticamente el **Web Dashboard** en tu navegador. Desde ahi puedes:
+1. Introducir la ruta del dump de FiveM
+2. Ejecutar el analisis con un click
+3. Ver todos los resultados en el dashboard interactivo
+4. Descargar el reporte en JSON
 
-El launcher se encarga de todo: instala el proyecto si no existe, verifica updates, y lanza el motor de analisis.
+El launcher se encarga de todo: instala el proyecto si no existe, verifica updates, y abre la interfaz web.
 
-### Modo directo (argumentos)
+### Opciones avanzadas
 ```bash
-python main.py /ruta/al/dump              # Analisis + Web Dashboard en navegador (default)
-python main.py /ruta/al/dump --no-gui     # Analisis sin interfaz (output directo + JSON)
-python main.py /ruta/al/dump --cmd-gui    # Analisis con menu interactivo en terminal (legacy)
+python main.py                             # Abre Web Dashboard (default)
+python main.py /ruta/al/dump --no-gui      # Analisis sin interfaz (output directo + JSON)
+python main.py /ruta/al/dump --cmd-gui     # Menu interactivo en terminal (legacy)
 ```
 
 ### Abrir reporte existente en Web Dashboard
 ```bash
-python web_gui.py reporte.json            # Abre un JSON de reporte en el navegador
+python web_gui.py reporte.json             # Abre un JSON de reporte en el navegador
 ```
 
 ## Estructura del Proyecto
