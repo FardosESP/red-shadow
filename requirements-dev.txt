@@ -1,0 +1,123 @@
+# ============================================================================
+# RED-SHADOW v4.0 - Development Dependencies
+# ============================================================================
+# These are additional dependencies for development, testing, and debugging
+# Install with: pip install -r requirements-dev.txt
+# ============================================================================
+
+# First install base requirements
+-r requirements.txt
+
+# ----------------------------------------------------------------------------
+# Development Tools
+# ----------------------------------------------------------------------------
+ipython>=8.0.0,<9.0.0          # Enhanced Python REPL
+ipdb>=0.13.0,<1.0.0            # IPython debugger
+jupyter>=1.0.0,<2.0.0          # Jupyter notebooks
+notebook>=6.4.0,<7.0.0         # Jupyter notebook server
+jupyterlab>=3.2.0,<4.0.0       # JupyterLab interface
+
+# ----------------------------------------------------------------------------
+# Testing & Coverage
+# ----------------------------------------------------------------------------
+pytest>=7.0.0,<8.0.0           # Testing framework
+pytest-cov>=3.0.0,<4.0.0       # Coverage reporting
+pytest-asyncio>=0.18.0,<1.0.0  # Async test support
+pytest-xdist>=2.5.0,<3.0.0     # Parallel test execution
+pytest-mock>=3.6.0,<4.0.0      # Mocking utilities
+pytest-timeout>=2.1.0,<3.0.0   # Test timeout handling
+pytest-benchmark>=3.4.0,<4.0.0 # Performance benchmarking
+hypothesis>=6.0.0,<7.0.0       # Property-based testing
+faker>=13.0.0,<14.0.0          # Fake data generation
+factory-boy>=3.2.0,<4.0.0      # Test fixture factories
+responses>=0.20.0,<1.0.0       # Mock HTTP requests
+freezegun>=1.2.0,<2.0.0        # Mock datetime for tests
+
+# ----------------------------------------------------------------------------
+# Code Quality & Linting
+# ----------------------------------------------------------------------------
+black>=22.0.0,<23.0.0          # Code formatting
+flake8>=4.0.0,<5.0.0           # Linting
+flake8-docstrings>=1.6.0       # Docstring linting
+flake8-bugbear>=22.0.0         # Additional bug detection
+flake8-comprehensions>=3.8.0   # Comprehension linting
+pylint>=2.12.0,<3.0.0          # Comprehensive linting
+mypy>=0.950,<1.0.0             # Static type checking
+isort>=5.10.0,<6.0.0           # Import sorting
+autopep8>=1.6.0,<2.0.0         # Auto-formatting
+pycodestyle>=2.8.0,<3.0.0      # PEP 8 style checker
+pydocstyle>=6.1.0,<7.0.0       # Docstring style checker
+bandit>=1.7.0,<2.0.0           # Security issue detection
+safety>=1.10.0,<2.0.0          # Dependency vulnerability scanner
+
+# ----------------------------------------------------------------------------
+# Type Checking & Stubs
+# ----------------------------------------------------------------------------
+types-requests>=2.27.0         # Type stubs for requests
+types-PyYAML>=6.0.0            # Type stubs for PyYAML
+types-python-dateutil>=2.8.0   # Type stubs for dateutil
+types-setuptools>=57.0.0       # Type stubs for setuptools
+
+# ----------------------------------------------------------------------------
+# Documentation
+# ----------------------------------------------------------------------------
+sphinx>=4.3.0,<5.0.0           # Documentation generation
+sphinx-rtd-theme>=1.0.0,<2.0.0 # Read the Docs theme
+sphinx-autodoc-typehints>=1.18.0 # Type hints in docs
+sphinx-click>=3.0.0,<4.0.0     # Document Click CLI
+myst-parser>=0.17.0,<1.0.0     # Markdown support in Sphinx
+sphinxcontrib-mermaid>=0.7.0   # Mermaid diagrams in docs
+
+# ----------------------------------------------------------------------------
+# Performance & Profiling
+# ----------------------------------------------------------------------------
+memory-profiler>=0.60.0        # Memory usage profiling
+py-spy>=0.3.0                  # Sampling profiler
+line-profiler>=3.5.0           # Line-by-line profiling
+scalene>=1.5.0                 # CPU+GPU+memory profiler
+snakeviz>=2.1.0                # Visualize cProfile output
+pyinstrument>=4.0.0            # Statistical profiler
+
+# ----------------------------------------------------------------------------
+# Debugging & Analysis
+# ----------------------------------------------------------------------------
+pdbpp>=0.10.0                  # Enhanced pdb debugger
+pudb>=2022.1                   # Full-screen console debugger
+icecream>=2.1.0                # Better print debugging
+loguru>=0.6.0                  # Advanced logging
+better-exceptions>=0.3.0       # Better exception formatting
+
+# ----------------------------------------------------------------------------
+# Build & Packaging
+# ----------------------------------------------------------------------------
+build>=0.7.0                   # PEP 517 build frontend
+wheel>=0.37.0                  # Wheel package format
+setuptools>=60.0.0             # Package setup
+twine>=3.7.0                   # PyPI upload tool
+bump2version>=1.0.0            # Version bumping
+
+# ----------------------------------------------------------------------------
+# Pre-commit Hooks
+# ----------------------------------------------------------------------------
+pre-commit>=2.17.0,<3.0.0      # Git pre-commit hooks
+
+# ----------------------------------------------------------------------------
+# Continuous Integration
+# ----------------------------------------------------------------------------
+tox>=3.24.0,<4.0.0             # Test automation
+coverage[toml]>=6.3.0,<7.0.0   # Coverage with TOML support
+codecov>=2.1.0                 # Codecov integration
+
+# ----------------------------------------------------------------------------
+# Dependency Management
+# ----------------------------------------------------------------------------
+pip-tools>=6.5.0               # Dependency pinning
+pipdeptree>=2.2.0              # Dependency tree visualization
+pip-audit>=2.0.0               # Audit dependencies for vulnerabilities
+
+# ----------------------------------------------------------------------------
+# Utilities
+# ----------------------------------------------------------------------------
+watchdog>=2.1.0                # File system monitoring
+python-dotenv>=0.19.0          # .env file support
+invoke>=1.6.0                  # Task execution

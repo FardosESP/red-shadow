@@ -1,0 +1,182 @@
+# ============================================================================
+# RED-SHADOW v4.0 - Ambani Integration Dependencies
+# ============================================================================
+# Python Version: 3.8+
+# Last Updated: 2024
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# Core Dependencies
+# ----------------------------------------------------------------------------
+python-dotenv>=0.19.0          # Environment variable management
+
+# ----------------------------------------------------------------------------
+# Machine Learning & AI (Behavioral Analyzer)
+# ----------------------------------------------------------------------------
+# Anomaly detection algorithms: Isolation Forest, One-Class SVM
+scikit-learn>=1.0.0,<2.0.0
+numpy>=1.21.0,<2.0.0
+pandas>=1.3.0,<2.0.0
+scipy>=1.7.0,<2.0.0
+
+# Deep Learning for Autoencoders (Behavioral Analyzer)
+tensorflow>=2.8.0,<3.0.0
+keras>=2.8.0,<3.0.0
+
+# Alternative: PyTorch (uncomment if using instead of TensorFlow)
+# torch>=1.10.0,<2.0.0
+# torchvision>=0.11.0,<1.0.0
+
+# ----------------------------------------------------------------------------
+# NLP & AI Decision Engine (AI-based variable renaming, decision making)
+# ----------------------------------------------------------------------------
+transformers>=4.20.0,<5.0.0    # BERT, GPT models for variable renaming
+tokenizers>=0.12.0,<1.0.0      # Fast tokenization
+sentencepiece>=0.1.96          # Tokenization for some models
+
+# ----------------------------------------------------------------------------
+# Network Analysis (Network Monitor, Deep Packet Inspector)
+# ----------------------------------------------------------------------------
+scapy>=2.4.5,<3.0.0            # Packet capture and analysis (primary choice)
+# pyshark>=0.5.0,<1.0.0        # Alternative: Wireshark wrapper (uncomment if preferred)
+
+# GeoIP for IP geolocation
+geoip2>=4.5.0,<5.0.0
+maxminddb>=2.2.0,<3.0.0
+
+# ----------------------------------------------------------------------------
+# Memory Forensics (Memory Forensics Engine)
+# ----------------------------------------------------------------------------
+psutil>=5.8.0,<6.0.0           # Process and system utilities
+# pymem>=1.8.0,<2.0.0          # Alternative: Windows memory manipulation (uncomment if needed)
+
+# YARA for malware detection
+yara-python>=4.2.0,<5.0.0
+
+# ----------------------------------------------------------------------------
+# Lua Decompilation & Bytecode Analysis (Bytecode Decompiler)
+# ----------------------------------------------------------------------------
+# Note: unluac is a Java tool, not a Python package
+# Custom Lua decompiler will be implemented in Python
+lupa>=1.13,<2.0.0              # Python-Lua bridge for sandbox execution
+
+# ----------------------------------------------------------------------------
+# Configuration & Data Management
+# ----------------------------------------------------------------------------
+pyyaml>=6.0,<7.0.0             # YAML configuration files
+toml>=0.10.2                   # TOML configuration support
+configparser>=5.2.0            # INI file parsing
+
+# ----------------------------------------------------------------------------
+# Database (Analysis History, Learning Feedback)
+# ----------------------------------------------------------------------------
+# sqlite3 is built-in to Python
+sqlalchemy>=1.4.0,<2.0.0       # ORM for database operations
+alembic>=1.7.0,<2.0.0          # Database migrations
+
+# ----------------------------------------------------------------------------
+# Logging & CLI
+# ----------------------------------------------------------------------------
+colorama>=0.4.4,<1.0.0         # Cross-platform colored terminal output
+rich>=12.0.0,<13.0.0           # Rich text and beautiful formatting in terminal
+click>=8.0.0,<9.0.0            # CLI argument parsing
+tqdm>=4.62.0,<5.0.0            # Progress bars
+
+# ----------------------------------------------------------------------------
+# Web & API (Security Reporter, Remote Updates)
+# ----------------------------------------------------------------------------
+requests>=2.26.0,<3.0.0        # HTTP requests
+beautifulsoup4>=4.10.0,<5.0.0  # HTML parsing
+jinja2>=3.0.0,<4.0.0           # HTML template rendering for reports
+markdown>=3.3.0,<4.0.0         # Markdown to HTML conversion
+
+# ----------------------------------------------------------------------------
+# Visualization (Security Reporter Charts)
+# ----------------------------------------------------------------------------
+matplotlib>=3.5.0,<4.0.0       # Plotting and charts
+seaborn>=0.11.0,<1.0.0         # Statistical visualizations
+plotly>=5.5.0,<6.0.0           # Interactive charts for HTML reports
+
+# ----------------------------------------------------------------------------
+# Code Analysis & AST Parsing
+# ----------------------------------------------------------------------------
+astroid>=2.9.0,<3.0.0          # Python AST analysis
+radon>=5.1.0,<6.0.0            # Code complexity metrics
+
+# ----------------------------------------------------------------------------
+# Cryptography & Security
+# ----------------------------------------------------------------------------
+cryptography>=36.0.0,<37.0.0   # Encryption/decryption utilities
+pycryptodome>=3.12.0,<4.0.0    # Additional crypto algorithms
+
+# ----------------------------------------------------------------------------
+# Game Theory & Optimization (AI Decision Engine)
+# ----------------------------------------------------------------------------
+nashpy>=0.0.21                 # Nash Equilibrium calculation
+cvxpy>=1.2.0,<2.0.0            # Convex optimization
+
+# ----------------------------------------------------------------------------
+# Reinforcement Learning (AI Decision Engine)
+# ----------------------------------------------------------------------------
+gym>=0.21.0,<1.0.0             # RL environment framework
+stable-baselines3>=1.5.0,<2.0.0 # RL algorithms
+
+# ----------------------------------------------------------------------------
+# Testing
+# ----------------------------------------------------------------------------
+pytest>=7.0.0,<8.0.0           # Testing framework
+pytest-cov>=3.0.0,<4.0.0       # Coverage reporting
+pytest-asyncio>=0.18.0,<1.0.0  # Async test support
+hypothesis>=6.0.0,<7.0.0       # Property-based testing
+faker>=13.0.0,<14.0.0          # Fake data generation for tests
+mock>=4.0.3,<5.0.0             # Mocking for tests
+
+# ----------------------------------------------------------------------------
+# Code Quality & Linting
+# ----------------------------------------------------------------------------
+black>=22.0.0,<23.0.0          # Code formatting
+flake8>=4.0.0,<5.0.0           # Linting
+pylint>=2.12.0,<3.0.0          # Additional linting
+mypy>=0.950,<1.0.0             # Static type checking
+isort>=5.10.0,<6.0.0           # Import sorting
+bandit>=1.7.0,<2.0.0           # Security issue detection
+
+# ----------------------------------------------------------------------------
+# Documentation
+# ----------------------------------------------------------------------------
+sphinx>=4.3.0,<5.0.0           # Documentation generation
+sphinx-rtd-theme>=1.0.0,<2.0.0 # Read the Docs theme
+sphinx-autodoc-typehints>=1.18.0 # Type hints in docs
+
+# ----------------------------------------------------------------------------
+# Performance & Profiling
+# ----------------------------------------------------------------------------
+memory-profiler>=0.60.0        # Memory usage profiling
+py-spy>=0.3.0                  # Sampling profiler
+line-profiler>=3.5.0           # Line-by-line profiling
+
+# ----------------------------------------------------------------------------
+# Utilities
+# ----------------------------------------------------------------------------
+python-dateutil>=2.8.0,<3.0.0  # Date/time utilities
+pytz>=2021.3                   # Timezone support
+regex>=2022.1.0                # Advanced regex support
+chardet>=4.0.0,<5.0.0          # Character encoding detection
+filelock>=3.4.0,<4.0.0         # File locking for concurrent access
+
+# ----------------------------------------------------------------------------
+# Optional: Platform-Specific Dependencies
+# ----------------------------------------------------------------------------
+# Windows-specific
+# pywin32>=303; platform_system=="Windows"  # Windows API access
+# wmi>=1.5.1; platform_system=="Windows"    # Windows Management Instrumentation
+
+# Linux-specific
+# python-iptables>=1.0.0; platform_system=="Linux"  # iptables management
+
+# ----------------------------------------------------------------------------
+# Development Dependencies (Optional)
+# ----------------------------------------------------------------------------
+# ipython>=8.0.0               # Enhanced Python shell
+# jupyter>=1.0.0               # Jupyter notebooks for analysis
+# notebook>=6.4.0              # Jupyter notebook server
