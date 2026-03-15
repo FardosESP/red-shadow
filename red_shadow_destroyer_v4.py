@@ -1640,19 +1640,24 @@ tr:hover {{ background: #1a1a1a; }}
 # ============================================================================
 
 def main():
-    if len(sys.argv) < 2:
-        print(BANNER)
-        print(f"{C.R}  Uso: python red_shadow_destroyer_v4.py <ruta_dump> [opciones]{C.X}")
-        print(f"{C.CN}  Ejemplo: python red_shadow_destroyer_v4.py C:\\FiveM_Dump{C.X}")
-        print(f"{C.GR}  Opciones:{C.X}")
-        print(f"{C.GR}    --no-gui   Ejecutar sin interfaz (output directo + exportar JSON){C.X}")
-        print(f"{C.GR}    --cmd-gui  Usar menu interactivo en terminal (legacy){C.X}")
-        print(f"{C.GR}    (default)  Abrir Web Dashboard en el navegador{C.X}")
-        sys.exit(1)
-
-    dump_path = sys.argv[1]
     no_gui = '--no-gui' in sys.argv
     cmd_gui = '--cmd-gui' in sys.argv
+
+    # Sin argumentos: abrir web dashboard directamente
+    if len(sys.argv) < 2 or sys.argv[1].startswith('--'):
+        if no_gui or cmd_gui:
+            print(BANNER)
+            print(f"{C.R}  Uso: python red_shadow_destroyer_v4.py <ruta_dump> [opciones]{C.X}")
+            sys.exit(1)
+        try:
+            from web_gui import launch_web_gui
+            launch_web_gui(None, auto_open=True)
+        except ImportError:
+            print(f"{C.R}[!] web_gui.py no encontrado.{C.X}")
+            sys.exit(1)
+        return
+
+    dump_path = sys.argv[1]
 
     if not os.path.exists(dump_path):
         print(f"{C.R}[!] Ruta no encontrada: {dump_path}{C.X}")
