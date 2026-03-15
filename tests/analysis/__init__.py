@@ -1,3 +1,0 @@
-"""
-Tests for Analysis Layer
-"""
