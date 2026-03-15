@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 RED-SHADOW "Destroyer" v4.0 - Advanced Forensic Engine
 Herramienta profesional de analisis forense de volcados redENGINE (FiveM)
