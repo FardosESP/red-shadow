@@ -44,639 +44,371 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RED-SHADOW v4.0 - Web Dashboard</title>
+<title>RED-SHADOW v4 - Trigger Finder</title>
 <style>
 :root {
-    --bg-primary: #0a0a0f;
-    --bg-secondary: #12121a;
-    --bg-card: #1a1a2e;
-    --bg-hover: #22223a;
-    --border: #2a2a3e;
-    --text-primary: #e0e0e0;
-    --text-secondary: #888;
-    --text-dim: #555;
-    --red: #ff3344;
-    --red-dark: #cc1133;
-    --red-glow: rgba(255, 51, 68, 0.3);
-    --green: #00cc66;
-    --green-dark: #009944;
-    --yellow: #ffcc00;
-    --yellow-dark: #cc9900;
-    --cyan: #00cccc;
-    --cyan-dark: #009999;
-    --magenta: #cc66ff;
-    --orange: #ff8833;
-    --critical: #ff0066;
+    --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a2e; --bgh: #22223a;
+    --border: #2a2a3e; --t1: #e0e0e0; --t2: #888; --t3: #555;
+    --red: #ff3344; --redd: #cc1133; --redg: rgba(255,51,68,.3);
+    --green: #00cc66; --greend: #009944;
+    --yellow: #ffcc00; --yellowd: #cc9900;
+    --cyan: #00cccc; --cyand: #009999;
+    --mag: #cc66ff; --ora: #ff8833; --crit: #ff0066;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--t1); font-family: 'Segoe UI','Consolas','Courier New',monospace; min-height: 100vh; overflow-x: hidden; }
+.header { background: linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%); border-bottom: 1px solid var(--border); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { color: var(--red); font-size: 22px; text-shadow: 0 0 20px var(--redg); letter-spacing: 2px; }
+.header .sub { color: var(--t2); font-size: 12px; }
+.header .dpath { color: var(--cyan); font-size: 11px; opacity: .7; }
 
-body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
-    font-family: 'Segoe UI', 'Consolas', 'Courier New', monospace;
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-body::after {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-    z-index: 9999;
-}
-
-/* Header */
-.header {
-    background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 20px 30px;
-    text-align: center;
-}
-
-.header h1 {
-    color: var(--red);
-    font-size: 28px;
-    text-shadow: 0 0 20px var(--red-glow);
-    letter-spacing: 3px;
-    margin-bottom: 5px;
-}
-
-.header .subtitle { color: var(--text-secondary); font-size: 13px; letter-spacing: 1px; }
-.header .dump-path { color: var(--cyan); font-size: 12px; margin-top: 8px; opacity: 0.7; }
-
-/* ==================== LANDING PAGE ==================== */
-.landing {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 100px);
-    padding: 40px 20px;
-}
-
-.landing-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 40px;
-    max-width: 600px;
-    width: 100%;
-    text-align: center;
-}
-
-.landing-box h2 {
-    color: var(--red);
-    margin-bottom: 8px;
-    font-size: 22px;
-}
-
-.landing-box p {
-    color: var(--text-secondary);
-    margin-bottom: 24px;
-    font-size: 14px;
-}
-
-.landing-input {
-    width: 100%;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 14px 16px;
-    color: var(--text-primary);
-    font-family: inherit;
-    font-size: 15px;
-    outline: none;
-    margin-bottom: 16px;
-    transition: border-color 0.2s;
-}
-
-.landing-input:focus {
-    border-color: var(--red);
-    box-shadow: 0 0 10px var(--red-glow);
-}
-
-.landing-input::placeholder { color: var(--text-dim); }
-
-.landing-btn {
-    width: 100%;
-    background: var(--red-dark);
-    border: 1px solid var(--red);
-    border-radius: 4px;
-    padding: 14px;
-    color: #fff;
-    font-family: inherit;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 1px;
-}
-
-.landing-btn:hover { background: var(--red); }
-.landing-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.landing-hint {
-    color: var(--text-dim);
-    font-size: 12px;
-    margin-top: 12px;
-}
-
-/* Progress overlay */
-.progress-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(10, 10, 15, 0.95);
-    z-index: 1000;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.progress-overlay.active { display: flex; }
-
-.progress-box {
-    text-align: center;
-    max-width: 500px;
-    padding: 40px;
-}
-
-.spinner {
-    display: inline-block;
-    width: 50px;
-    height: 50px;
-    border: 3px solid var(--border);
-    border-top-color: var(--red);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin-bottom: 20px;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.progress-text {
-    color: var(--text-primary);
-    font-size: 16px;
-    margin-bottom: 10px;
-}
-
-.progress-detail {
-    color: var(--text-secondary);
-    font-size: 13px;
-    min-height: 20px;
-}
-
-.progress-error {
-    color: var(--red);
-    font-size: 14px;
-    margin-top: 16px;
-    max-width: 500px;
-    word-break: break-word;
-}
-
-/* ==================== DASHBOARD ==================== */
-.dashboard { display: none; }
-.dashboard.active { display: block; }
-
-/* Navigation */
-.nav {
-    background: var(--bg-secondary);
-    border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.nav-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    padding: 12px 16px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 13px;
-    transition: all 0.2s;
-    border-bottom: 2px solid transparent;
-    white-space: nowrap;
-}
-
-.nav-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
-.nav-btn.active { color: var(--red); border-bottom-color: var(--red); text-shadow: 0 0 10px var(--red-glow); }
-
-.main { max-width: 1400px; margin: 0 auto; padding: 20px; }
-
-.section { display: none; }
-.section.active { display: block; }
-
+/* Landing */
+.landing { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:calc(100vh - 60px); padding:40px 20px; }
+.lbox { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:36px; max-width:580px; width:100%; text-align:center; }
+.lbox h2 { color:var(--red); margin-bottom:6px; font-size:20px; }
+.lbox p { color:var(--t2); margin-bottom:20px; font-size:13px; }
+.linput { width:100%; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:12px 14px; color:var(--t1); font-family:inherit; font-size:14px; outline:none; margin-bottom:12px; transition:border-color .2s; }
+.linput:focus { border-color:var(--red); box-shadow:0 0 8px var(--redg); }
+.linput::placeholder { color:var(--t3); }
+.lbtn { width:100%; background:var(--redd); border:1px solid var(--red); border-radius:4px; padding:13px; color:#fff; font-family:inherit; font-size:15px; font-weight:bold; cursor:pointer; transition:all .2s; letter-spacing:1px; }
+.lbtn:hover { background:var(--red); }
+.lbtn:disabled { opacity:.5; cursor:not-allowed; }
+.lhint { color:var(--t3); font-size:11px; margin-top:10px; }
+/* Progress */
+.prog { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(10,10,15,.96); z-index:1000; flex-direction:column; align-items:center; justify-content:center; }
+.prog.on { display:flex; }
+.spin { display:inline-block; width:44px; height:44px; border:3px solid var(--border); border-top-color:var(--red); border-radius:50%; animation:spin .8s linear infinite; margin-bottom:18px; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.prog-txt { color:var(--t1); font-size:15px; margin-bottom:8px; }
+.prog-det { color:var(--t2); font-size:12px; min-height:18px; }
+.prog-err { color:var(--red); font-size:13px; margin-top:14px; max-width:480px; word-break:break-word; }
+/* Dashboard */
+.dash { display:none; }
+.dash.on { display:block; }
+.nav { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 16px; display:flex; flex-wrap:wrap; gap:1px; position:sticky; top:0; z-index:100; }
+.nb { background:transparent; border:none; color:var(--t2); padding:11px 14px; cursor:pointer; font-family:inherit; font-size:12px; transition:all .2s; border-bottom:2px solid transparent; white-space:nowrap; }
+.nb:hover { color:var(--t1); background:var(--bgh); }
+.nb.on { color:var(--red); border-bottom-color:var(--red); }
+.nb-new { background:transparent; border:1px solid var(--border); border-radius:4px; padding:7px 14px; color:var(--t2); cursor:pointer; font-family:inherit; font-size:12px; transition:all .2s; margin-left:auto; align-self:center; }
+.nb-new:hover { border-color:var(--yellow); color:var(--yellow); }
+.main { max-width:1400px; margin:0 auto; padding:18px; }
+.sec { display:none; }
+.sec.on { display:block; }
 /* Cards */
-.card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 16px;
-}
-
-.card-title {
-    color: var(--cyan);
-    font-size: 16px;
-    margin-bottom: 14px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-    letter-spacing: 1px;
-}
-
-/* Stats grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.stat-box {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 16px;
-    text-align: center;
-    transition: transform 0.2s, border-color 0.2s;
-}
-
-.stat-box:hover { transform: translateY(-2px); border-color: var(--cyan-dark); }
-.stat-value { font-size: 28px; font-weight: bold; margin-bottom: 4px; }
-.stat-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
-
-/* Risk meter */
-.risk-meter { width: 100%; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; margin: 10px 0; }
-.risk-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
-
-/* Tables */
-.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.data-table th {
-    background: var(--bg-secondary); color: var(--cyan); padding: 10px 12px;
-    text-align: left; border: 1px solid var(--border); font-weight: normal;
-    text-transform: uppercase; font-size: 11px; letter-spacing: 1px;
-    position: sticky; top: 46px; z-index: 10;
-}
-.data-table td { padding: 8px 12px; border: 1px solid var(--border); vertical-align: top; }
-.data-table tr:hover td { background: var(--bg-hover); }
-.data-table .mono { font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; }
-
+.card { background:var(--bg3); border:1px solid var(--border); border-radius:6px; padding:18px; margin-bottom:14px; }
+.ctitle { color:var(--cyan); font-size:14px; margin-bottom:12px; padding-bottom:7px; border-bottom:1px solid var(--border); letter-spacing:1px; }
+/* Stats */
+.sgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-bottom:18px; }
+.sbox { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px; text-align:center; }
+.sval { font-size:26px; font-weight:bold; margin-bottom:3px; }
+.slbl { font-size:10px; color:var(--t2); text-transform:uppercase; letter-spacing:1px; }
+/* Table */
+.dt { width:100%; border-collapse:collapse; font-size:12px; }
+.dt th { background:var(--bg2); color:var(--cyan); padding:9px 10px; text-align:left; border:1px solid var(--border); font-weight:normal; text-transform:uppercase; font-size:10px; letter-spacing:1px; position:sticky; top:44px; z-index:10; }
+.dt td { padding:7px 10px; border:1px solid var(--border); vertical-align:top; }
+.dt tr:hover td { background:var(--bgh); }
+.mono { font-family:'Consolas','Courier New',monospace; font-size:11px; }
 /* Tags */
-.tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; letter-spacing: 0.5px; margin: 1px; }
-.tag-safe { background: var(--green-dark); color: #fff; }
-.tag-warn { background: var(--yellow-dark); color: #000; }
-.tag-danger { background: var(--red-dark); color: #fff; }
-.tag-critical { background: var(--critical); color: #fff; }
-.tag-honeypot { background: #ff0066; color: #fff; }
-.tag-ban { background: #cc0000; color: #fff; }
-.tag-val { background: var(--green-dark); color: #fff; }
-.tag-info { background: var(--cyan-dark); color: #fff; }
-.tag-obf { background: var(--magenta); color: #fff; }
-
-/* Code blocks */
-.code-block {
-    background: #0d0d12; border: 1px solid var(--border); border-radius: 4px;
-    padding: 12px; font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 12px; line-height: 1.5; overflow-x: auto;
-    color: var(--text-secondary); max-height: 200px; overflow-y: auto;
-    white-space: pre-wrap; word-break: break-all;
-}
-
+.tag { display:inline-block; padding:2px 7px; border-radius:3px; font-size:10px; font-weight:bold; margin:1px; }
+.t-safe { background:var(--greend); color:#fff; }
+.t-warn { background:var(--yellowd); color:#000; }
+.t-danger { background:var(--redd); color:#fff; }
+.t-crit { background:var(--crit); color:#fff; }
+.t-hp { background:#ff0066; color:#fff; }
+.t-ban { background:#cc0000; color:#fff; }
+.t-val { background:var(--greend); color:#fff; }
+.t-info { background:var(--cyand); color:#fff; }
+.t-mag { background:var(--mag); color:#fff; }
+/* Code */
+.code { background:#0d0d12; border:1px solid var(--border); border-radius:4px; padding:10px; font-family:'Consolas','Courier New',monospace; font-size:12px; line-height:1.5; overflow-x:auto; color:var(--t2); max-height:180px; overflow-y:auto; white-space:pre-wrap; word-break:break-all; }
 /* Search */
-.search-box { display: flex; gap: 8px; margin-bottom: 16px; }
-.search-input {
-    flex: 1; background: var(--bg-secondary); border: 1px solid var(--border);
-    border-radius: 4px; padding: 10px 14px; color: var(--text-primary);
-    font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s;
-}
-.search-input:focus { border-color: var(--red); box-shadow: 0 0 10px var(--red-glow); }
-.search-input::placeholder { color: var(--text-dim); }
-
-/* Filter buttons */
-.filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
-.filter-btn {
-    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 4px;
-    padding: 6px 14px; color: var(--text-secondary); cursor: pointer;
-    font-family: inherit; font-size: 12px; transition: all 0.2s;
-}
-.filter-btn:hover, .filter-btn.active { color: #fff; border-color: var(--red); background: rgba(255, 51, 68, 0.15); }
-
-/* Recommendations */
-.rec-list { list-style: none; padding: 0; }
-.rec-list li {
-    padding: 10px 14px; margin-bottom: 6px; background: var(--bg-secondary);
-    border-left: 3px solid var(--yellow); border-radius: 0 4px 4px 0; font-size: 13px;
-}
-
-/* Chain visualization */
-.chain-item { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; padding: 10px; background: var(--bg-secondary); border-radius: 4px; }
-.chain-node { background: var(--bg-card); border: 1px solid var(--cyan-dark); border-radius: 4px; padding: 4px 10px; font-size: 12px; color: var(--cyan); }
-.chain-arrow { color: var(--text-dim); font-size: 14px; }
-
-/* Export bar */
-.export-bar { display: flex; gap: 8px; margin-bottom: 16px; justify-content: flex-end; }
-.btn {
-    background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px;
-    padding: 8px 16px; color: var(--text-primary); cursor: pointer;
-    font-family: inherit; font-size: 13px; transition: all 0.2s;
-}
-.btn:hover { border-color: var(--red); background: rgba(255, 51, 68, 0.1); }
-.btn-primary { background: var(--red-dark); border-color: var(--red); color: #fff; }
-.btn-primary:hover { background: var(--red); }
-
-/* New analysis button */
-.btn-new-analysis {
-    background: transparent; border: 1px solid var(--border); border-radius: 4px;
-    padding: 8px 16px; color: var(--text-secondary); cursor: pointer;
-    font-family: inherit; font-size: 13px; transition: all 0.2s;
-    margin-left: auto;
-}
-.btn-new-analysis:hover { border-color: var(--yellow); color: var(--yellow); }
-
-/* Severity/risk */
-.sev-critical { color: var(--critical); }
-.sev-high { color: var(--red); }
-.sev-medium { color: var(--yellow); }
-.sev-low { color: var(--green); }
-.risk-safe { color: var(--green); }
-.risk-warn { color: var(--yellow); }
-.risk-danger { color: var(--red); }
-.risk-critical { color: var(--critical); }
-
-/* Confidence bar */
-.conf-bar { display: inline-block; width: 60px; height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-left: 6px; }
-.conf-fill { height: 100%; border-radius: 3px; }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-primary); }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #444; }
-
+.sbox2 { display:flex; gap:8px; margin-bottom:14px; }
+.sinput { flex:1; background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:9px 12px; color:var(--t1); font-family:inherit; font-size:13px; outline:none; transition:border-color .2s; }
+.sinput:focus { border-color:var(--red); }
+.sinput::placeholder { color:var(--t3); }
+/* Filters */
+.filters { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:12px; }
+.fb { background:var(--bg2); border:1px solid var(--border); border-radius:4px; padding:5px 12px; color:var(--t2); cursor:pointer; font-family:inherit; font-size:11px; transition:all .2s; }
+.fb:hover,.fb.on { color:#fff; border-color:var(--red); background:rgba(255,51,68,.15); }
+/* Exploit card */
+.xcard { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px; margin-bottom:10px; display:flex; align-items:flex-start; gap:12px; }
+.xcard:hover { border-color:var(--greend); }
+.xcard.hp { border-color:var(--crit) !important; }
+.xname { font-size:14px; font-weight:bold; color:var(--green); font-family:'Consolas','Courier New',monospace; margin-bottom:4px; }
+.xname.hp { color:var(--crit); }
+.xline { font-family:'Consolas','Courier New',monospace; font-size:12px; color:var(--t2); background:#0d0d12; border:1px solid var(--border); border-radius:3px; padding:6px 10px; margin:6px 0; word-break:break-all; }
+.xcopy { background:var(--greend); border:none; border-radius:4px; padding:7px 16px; color:#fff; cursor:pointer; font-family:inherit; font-size:12px; font-weight:bold; transition:all .2s; white-space:nowrap; flex-shrink:0; }
+.xcopy:hover { background:var(--green); }
+.xcopy.hp { background:var(--redd); }
+.xcopy.hp:hover { background:var(--red); }
+.xmeta { font-size:11px; color:var(--t3); margin-top:4px; }
+/* Btn */
+.btn { background:var(--bg3); border:1px solid var(--border); border-radius:4px; padding:7px 14px; color:var(--t1); cursor:pointer; font-family:inherit; font-size:12px; transition:all .2s; }
+.btn:hover { border-color:var(--red); background:rgba(255,51,68,.1); }
+.btn-g { background:var(--greend); border-color:var(--green); color:#fff; }
+.btn-g:hover { background:var(--green); }
+/* Risk */
+.rs { color:var(--green); }
+.rw { color:var(--yellow); }
+.rd { color:var(--red); }
+.rc { color:var(--crit); }
+/* Conf bar */
+.cb { display:inline-block; width:50px; height:5px; background:var(--bg); border-radius:3px; overflow:hidden; vertical-align:middle; margin-left:5px; }
+.cbf { height:100%; border-radius:3px; }
 /* Toast */
-.toast {
-    position: fixed; bottom: 20px; right: 20px; background: var(--bg-card);
-    border: 1px solid var(--green); border-radius: 6px; padding: 12px 20px;
-    color: var(--green); font-size: 13px; z-index: 10000;
-    opacity: 0; transform: translateY(10px); transition: all 0.3s;
-}
-.toast.show { opacity: 1; transform: translateY(0); }
-
-@media (max-width: 768px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr); }
-    .nav-btn { padding: 10px 10px; font-size: 12px; }
-    .header h1 { font-size: 20px; }
-    .landing-box { padding: 24px; }
-}
+.toast { position:fixed; bottom:18px; right:18px; background:var(--bg3); border:1px solid var(--green); border-radius:6px; padding:10px 18px; color:var(--green); font-size:12px; z-index:10000; opacity:0; transform:translateY(8px); transition:all .3s; }
+.toast.on { opacity:1; transform:translateY(0); }
+/* AC card */
+.accard { background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:14px; margin-bottom:10px; }
+/* Scrollbar */
+::-webkit-scrollbar { width:7px; height:7px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:#444; }
+@media(max-width:768px) { .sgrid { grid-template-columns:repeat(2,1fr); } .nb { padding:9px 9px; font-size:11px; } }
 </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>RED-SHADOW "Destroyer" v4.0</h1>
-    <div class="subtitle">Advanced Forensic Engine - Web Dashboard</div>
-    <div class="dump-path" id="dump-path"></div>
+    <div>
+        <h1>🔥 RED-SHADOW v4</h1>
+        <div class="sub">Trigger Finder &amp; Exploit Generator — Offline</div>
+    </div>
+    <div class="dpath" id="dump-path"></div>
 </div>
 
-<!-- ==================== LANDING PAGE ==================== -->
+<!-- LANDING -->
 <div class="landing" id="landing">
-    <div class="landing-box">
-        <h2>Analisis Forense</h2>
-        <p>Introduce la ruta de la carpeta del dump de FiveM para iniciar el analisis.</p>
-        <input type="text" class="landing-input" id="dump-input"
-            placeholder="C:\Users\user\Desktop\FiveM_Dump" autofocus>
-        <button class="landing-btn" id="analyze-btn" onclick="startAnalysis()">
-            ANALIZAR
-        </button>
-        <div class="landing-hint">
-            Ejemplo: C:\FiveM_Dump o /home/user/dumps/server1
-        </div>
-    </div>
+  <div class="lbox">
+    <h2>🔥 RED-SHADOW v4 — Trigger Finder</h2>
+    <p>Analiza dumps FiveM offline. Genera exploits listos para copiar y pegar en Ambani.</p>
+    <label style="display:block;text-align:left;color:var(--t2);font-size:11px;margin-bottom:5px">📁 Ruta del dump (.lua files)</label>
+    <input type="text" class="linput" id="dump-input" placeholder="C:\Users\user\Desktop\FiveM_Dump" autofocus>
+
+    <label style="display:block;text-align:left;color:var(--t2);font-size:11px;margin-bottom:5px">⚡ triggers.lua de Ambani <span style="color:var(--green)">(opcional)</span></label>
+    <input type="text" class="linput" id="ambani-input" placeholder="C:\AmbaniFiles\xqw0FQ91\[Extracted]\triggers.lua">
+    <div style="text-align:left;color:var(--t3);font-size:10px;margin-bottom:14px">Solo triggers.lua = análisis instantáneo sin dump completo.</div>
+    <button class="lbtn" id="analyze-btn" onclick="startAnalysis()">🔍 ANALIZAR</button>
+    <div class="lhint">✅ Sin detección · ✅ Honeypots · ✅ Exploits listos para copiar</div>
+  </div>
 </div>
 
-<!-- ==================== PROGRESS OVERLAY ==================== -->
-<div class="progress-overlay" id="progress-overlay">
-    <div class="progress-box">
-        <div class="spinner"></div>
-        <div class="progress-text">Ejecutando analisis forense...</div>
-        <div class="progress-detail" id="progress-detail">Iniciando...</div>
-        <div class="progress-error" id="progress-error"></div>
-    </div>
+<!-- PROGRESS -->
+<div class="prog" id="prog">
+  <div style="text-align:center;max-width:460px;padding:36px">
+    <div class="spin"></div>
+    <div class="prog-txt">Analizando dump...</div>
+    <div class="prog-det" id="prog-det">Iniciando...</div>
+    <div class="prog-err" id="prog-err"></div>
+  </div>
 </div>
 
 <!-- ==================== DASHBOARD ==================== -->
-<div class="dashboard" id="dashboard">
-    <nav class="nav" id="nav">
-        <button class="nav-btn active" data-section="summary">Resumen</button>
-        <button class="nav-btn" data-section="triggers">Triggers</button>
-        <button class="nav-btn" data-section="honeypots">Honeypots</button>
-        <button class="nav-btn" data-section="anticheats">Anticheats</button>
-        <button class="nav-btn" data-section="obfuscation">Ofuscacion</button>
-        <button class="nav-btn" data-section="natives">Natives</button>
-        <button class="nav-btn" data-section="callbacks">Callbacks</button>
-        <button class="nav-btn" data-section="security">Seguridad</button>
-        <button class="nav-btn" data-section="manifests">Manifests</button>
-        <button class="nav-btn" data-section="chains">Cadenas</button>
-        <button class="nav-btn" data-section="clones">Clones</button>
-        <button class="nav-btn" data-section="search">Buscar</button>
-        <button class="btn-new-analysis" onclick="newAnalysis()">Nuevo analisis</button>
-    </nav>
+<div class="dash" id="dashboard">
+  <nav class="nav" id="nav">
+    <button class="nb on" data-s="summary">Resumen</button>
+    <button class="nb" data-s="exploitable">🎯 Explotables</button>
+    <button class="nb" data-s="knowndb">🗄️ Known DB</button>
+    <button class="nb" data-s="triggers">Triggers</button>
+    <button class="nb" data-s="honeypots">🍯 Honeypots</button>
+    <button class="nb" data-s="webhooks">🔗 Webhooks</button>
+    <button class="nb" data-s="anticheats">🛡️ Anticheats</button>
+    <button class="nb" data-s="backdoors">Backdoors</button>
+    <button class="nb" data-s="locations">🗺️ Spots</button>
+    <button class="nb" data-s="search">Buscar</button>
+    <button class="nb-new" onclick="newAnalysis()">+ Nuevo</button>
+  </nav>
+  <div class="main">
 
-    <div class="main" id="main-content">
-        <!-- SUMMARY -->
-        <div class="section" id="sec-summary">
-            <div class="export-bar">
-                <button class="btn" onclick="downloadJSON()">Descargar JSON</button>
-            </div>
-            <div class="stats-grid" id="stats-grid"></div>
-            <div class="card">
-                <div class="card-title">RIESGO GENERAL</div>
-                <div id="risk-display"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">RECOMENDACIONES</div>
-                <ul class="rec-list" id="recommendations"></ul>
-            </div>
-        </div>
-
-        <!-- TRIGGERS -->
-        <div class="section" id="sec-triggers">
-            <div class="search-box">
-                <input type="text" class="search-input" id="trigger-search" placeholder="Filtrar triggers por nombre...">
-            </div>
-            <div class="filters" id="trigger-filters">
-                <button class="filter-btn active" data-filter="all">Todos</button>
-                <button class="filter-btn" data-filter="safe">Seguros</button>
-                <button class="filter-btn" data-filter="warn">Advertencia</button>
-                <button class="filter-btn" data-filter="danger">Peligrosos</button>
-            </div>
-            <div id="triggers-table-wrap"></div>
-        </div>
-
-        <!-- HONEYPOTS -->
-        <div class="section" id="sec-honeypots">
-            <div class="card">
-                <div class="card-title" style="color:var(--critical)">HONEYPOTS DETECTADOS</div>
-                <p style="color:var(--red);margin-bottom:14px;font-size:13px;">
-                    Ejecutar estos triggers resultara en BAN inmediato. Evitar a toda costa.
-                </p>
-                <div id="honeypots-content"></div>
-            </div>
-        </div>
-
-        <!-- ANTICHEATS -->
-        <div class="section" id="sec-anticheats">
-            <div class="card">
-                <div class="card-title">ANTICHEATS IDENTIFICADOS</div>
-                <div id="anticheats-content"></div>
-            </div>
-        </div>
-
-        <!-- OBFUSCATION -->
-        <div class="section" id="sec-obfuscation">
-            <div class="filters" id="obf-filters"></div>
-            <div id="obfuscation-content"></div>
-        </div>
-
-        <!-- NATIVES -->
-        <div class="section" id="sec-natives">
-            <div class="filters" id="native-filters"></div>
-            <div id="natives-content"></div>
-        </div>
-
-        <!-- CALLBACKS -->
-        <div class="section" id="sec-callbacks">
-            <div id="callbacks-content"></div>
-        </div>
-
-        <!-- SECURITY -->
-        <div class="section" id="sec-security">
-            <div class="filters" id="security-filters"></div>
-            <div id="security-content"></div>
-        </div>
-
-        <!-- MANIFESTS -->
-        <div class="section" id="sec-manifests">
-            <div id="manifests-content"></div>
-        </div>
-
-        <!-- CHAINS -->
-        <div class="section" id="sec-chains">
-            <div class="card">
-                <div class="card-title">CADENAS DE TRIGGERS (Cross-File)</div>
-                <div id="chains-content"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">REFERENCIAS CRUZADAS</div>
-                <div id="crossrefs-content"></div>
-            </div>
-        </div>
-
-        <!-- CLONES -->
-        <div class="section" id="sec-clones">
-            <div class="card">
-                <div class="card-title">CODIGO DUPLICADO</div>
-                <div id="clones-content"></div>
-            </div>
-        </div>
-
-        <!-- SEARCH -->
-        <div class="section" id="sec-search">
-            <div class="search-box">
-                <input type="text" class="search-input" id="global-search" placeholder="Buscar trigger por nombre...">
-                <button class="btn btn-primary" onclick="doGlobalSearch()">Buscar</button>
-            </div>
-            <div id="search-results"></div>
-        </div>
+    <!-- SUMMARY -->
+    <div class="sec on" id="sec-summary">
+      <div style="margin-bottom:12px"><button class="btn" onclick="downloadJSON()">⬇ Descargar JSON</button></div>
+      <div class="sgrid" id="stats-grid"></div>
+      <div class="card">
+        <div class="ctitle">RIESGO GENERAL</div>
+        <div id="risk-display"></div>
+      </div>
+      <div class="card">
+        <div class="ctitle">RECOMENDACIONES</div>
+        <ul id="recommendations" style="padding-left:18px;font-size:13px;line-height:1.8;color:var(--t2)"></ul>
+      </div>
     </div>
+
+    <!-- EXPLOTABLES -->
+    <div class="sec" id="sec-exploitable">
+      <div class="filters" id="exploitable-filters">
+        <button class="fb on" data-filter="all">Todos</button>
+        <button class="fb" data-filter="money">💰 Money</button>
+        <button class="fb" data-filter="item">📦 Items</button>
+        <button class="fb" data-filter="xp">⭐ XP</button>
+        <button class="fb" data-filter="other">🔧 Otros</button>
+      </div>
+      <div id="exploitable-content"></div>
+    </div>
+
+    <!-- KNOWN DB -->
+    <div class="sec" id="sec-knowndb">
+      <div class="filters" id="knowndb-filters">
+        <button class="fb on" data-filter="all">Todos</button>
+        <button class="fb" data-filter="ready" style="border-color:var(--green)">✅ Listos</button>
+        <button class="fb" data-filter="money">💰 Money</button>
+        <button class="fb" data-filter="item">📦 Items</button>
+        <button class="fb" data-filter="job">� Job</button>
+        <button class="fb" data-filter="vehicle">� Vehículos</button>
+        <button class="fb" data-filter="ESX">ESX</button>
+        <button class="fb" data-filter="QBCore">QBCore</button>
+      </div>
+      <div id="knowndb-content"></div>
+    </div>
+
+    <!-- TRIGGERS -->
+    <div class="sec" id="sec-triggers">
+      <div class="sbox2">
+        <input type="text" class="sinput" id="trigger-search" placeholder="Filtrar por nombre...">
+      </div>
+      <div class="filters" id="trigger-filters">
+        <button class="fb on" data-filter="all">Todos</button>
+        <button class="fb" data-filter="safe">Seguros</button>
+        <button class="fb" data-filter="warn">Advertencia</button>
+        <button class="fb" data-filter="danger">Peligrosos</button>
+        <button class="fb" data-filter="novalidation" style="border-color:var(--red)">🚨 Sin Validacion</button>
+        <button class="fb" data-filter="reward" style="border-color:var(--green)">💰 Con Reward</button>
+      </div>
+      <div id="triggers-table-wrap"></div>
+    </div>
+
+    <!-- HONEYPOTS -->
+    <div class="sec" id="sec-honeypots">
+      <div class="card" style="border-color:var(--crit)">
+        <div class="ctitle" style="color:var(--crit)">🍯 HONEYPOTS — BAN INMEDIATO</div>
+        <div id="honeypots-content"></div>
+      </div>
+    </div>
+
+    <!-- WEBHOOKS -->
+    <div class="sec" id="sec-webhooks">
+      <div class="card" style="border-color:var(--ora)">
+        <div class="ctitle" style="color:var(--ora)">🔗 WEBHOOKS HARDCODEADOS</div>
+        <div id="webhooks-content"></div>
+      </div>
+    </div>
+
+    <!-- ANTICHEATS -->
+    <div class="sec" id="sec-anticheats">
+      <div id="anticheats-content"></div>
+    </div>
+
+    <!-- BACKDOORS -->
+    <div class="sec" id="sec-backdoors">
+      <div class="card" style="border-color:var(--crit)">
+        <div class="ctitle" style="color:var(--crit)">BACKDOORS DETECTADOS</div>
+        <div id="backdoors-content"></div>
+      </div>
+    </div>
+
+    <!-- LOCATIONS -->
+    <div class="sec" id="sec-locations">
+      <div class="card">
+        <div class="ctitle">🗺️ SPOTS ILEGALES</div>
+        <div class="filters" id="location-filters">
+          <button class="fb on" data-filter="all">Todas</button>
+          <button class="fb" data-filter="weed" style="border-color:#00cc66">🌿 Weed</button>
+          <button class="fb" data-filter="meth" style="border-color:#00cccc">🧪 Meth</button>
+          <button class="fb" data-filter="cocaine" style="border-color:#ffffff">❄️ Cocaine</button>
+          <button class="fb" data-filter="heroin" style="border-color:#cc66ff">💉 Heroína</button>
+          <button class="fb" data-filter="mdma" style="border-color:#ff8833">💊 MDMA</button>
+          <button class="fb" data-filter="lsd" style="border-color:#ff3344">🔮 LSD</button>
+          <button class="fb" data-filter="mush" style="border-color:#cc9900">🍄 Mush</button>
+          <button class="fb" data-filter="generic">🎯 Genérico</button>
+          <button class="fb" data-filter="robbery" style="border-color:#ff3344">🔫 Robo</button>
+          <button class="fb" data-filter="chop_shop" style="border-color:#ff8833">🚗 Chop Shop</button>
+          <button class="fb" data-filter="arms_dealing" style="border-color:#cc66ff">💣 Armas</button>
+          <button class="fb" data-filter="illegal_mining" style="border-color:#cc9900">⛏️ Minería</button>
+          <button class="fb" data-filter="illegal_trade" style="border-color:#888">🖤 Mercado Negro</button>
+        </div>
+        <div style="margin-bottom:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" onclick="downloadLocationsCSV()">Export CSV</button>
+          <button class="btn" onclick="downloadLocationsJSON()">Export JSON</button>
+          <button class="btn" onclick="downloadLocationsLua()">Export Lua</button>
+        </div>
+        <div id="locations-content"></div>
+      </div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="sec" id="sec-search">
+      <div class="sbox2">
+        <input type="text" class="sinput" id="global-search" placeholder="Buscar trigger por nombre...">
+        <button class="btn btn-g" onclick="doGlobalSearch()">Buscar</button>
+      </div>
+      <div id="search-results"></div>
+    </div>
+
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-// ============================================================================
-// STATE
-// ============================================================================
-
 var DATA = null;
-var currentSection = 'summary';
+var curSec = 'summary';
 var triggerFilter = 'all';
 
-// ============================================================================
 // PAGE ROUTING
-// ============================================================================
-
 function showLanding() {
     document.getElementById('landing').style.display = 'flex';
-    document.getElementById('dashboard').classList.remove('active');
-    document.getElementById('progress-overlay').classList.remove('active');
+    document.getElementById('dashboard').classList.remove('on');
+    document.getElementById('prog').classList.remove('on');
     document.getElementById('dump-path').textContent = '';
     document.getElementById('dump-input').value = '';
+    document.getElementById('ambani-input').value = '';
     document.getElementById('dump-input').focus();
 }
 
 function showProgress() {
     document.getElementById('landing').style.display = 'none';
-    document.getElementById('dashboard').classList.remove('active');
-    document.getElementById('progress-overlay').classList.add('active');
-    document.getElementById('progress-error').textContent = '';
+    document.getElementById('dashboard').classList.remove('on');
+    document.getElementById('prog').classList.add('on');
+    document.getElementById('prog-err').textContent = '';
 }
 
 function showDashboard() {
     document.getElementById('landing').style.display = 'none';
-    document.getElementById('progress-overlay').classList.remove('active');
-    document.getElementById('dashboard').classList.add('active');
+    document.getElementById('prog').classList.remove('on');
+    document.getElementById('dashboard').classList.add('on');
     document.getElementById('dump-path').textContent = 'Dump: ' + (DATA.dump_path || 'N/A');
     renderSummary();
     showSection('summary');
 }
 
-function newAnalysis() {
-    DATA = null;
-    showLanding();
-}
+function newAnalysis() { DATA = null; showLanding(); }
 
-// ============================================================================
 // ANALYSIS FLOW
-// ============================================================================
-
 function startAnalysis() {
     var path = document.getElementById('dump-input').value.trim();
-    if (!path) {
-        document.getElementById('dump-input').focus();
-        return;
-    }
-
+    var ambaniPath = document.getElementById('ambani-input').value.trim();
+    if (!path && !ambaniPath) { document.getElementById('dump-input').focus(); return; }
     document.getElementById('analyze-btn').disabled = true;
     showProgress();
-
     fetch('/api/analyze', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({path: path})
+        body: JSON.stringify({path: path, ambani_triggers: ambaniPath})
     })
     .then(function(r) { return r.json(); })
     .then(function(d) {
         if (d.error) {
-            document.getElementById('progress-error').textContent = 'Error: ' + d.error;
+            document.getElementById('prog-err').textContent = 'Error: ' + d.error;
             document.getElementById('analyze-btn').disabled = false;
             setTimeout(showLanding, 3000);
             return;
         }
-        // Start polling for status
         pollStatus();
     })
     .catch(function(e) {
-        document.getElementById('progress-error').textContent = 'Error de conexion: ' + e.message;
+        document.getElementById('prog-err').textContent = 'Error de conexion: ' + e.message;
         document.getElementById('analyze-btn').disabled = false;
     });
 }
@@ -685,120 +417,144 @@ function pollStatus() {
     fetch('/api/status')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-        document.getElementById('progress-detail').textContent = d.progress || '';
-
-        if (d.error) {
-            document.getElementById('progress-error').textContent = 'Error: ' + d.error;
-            document.getElementById('analyze-btn').disabled = false;
-            return;
-        }
-
+        document.getElementById('prog-det').textContent = d.progress || '';
+        if (d.error) { document.getElementById('prog-err').textContent = 'Error: ' + d.error; document.getElementById('analyze-btn').disabled = false; return; }
         if (d.done) {
-            // Fetch final data
-            fetch('/api/data')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                DATA = data;
-                document.getElementById('analyze-btn').disabled = false;
-                showDashboard();
+            fetch('/api/data').then(function(r) { return r.json(); }).then(function(data) {
+                DATA = data; document.getElementById('analyze-btn').disabled = false; showDashboard();
             });
             return;
         }
-
-        // Keep polling
         setTimeout(pollStatus, 500);
     })
-    .catch(function(e) {
-        setTimeout(pollStatus, 1000);
-    });
+    .catch(function() { setTimeout(pollStatus, 1000); });
 }
 
-// Enter key on input
-document.getElementById('dump-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') startAnalysis();
-});
+document.getElementById('dump-input').addEventListener('keydown', function(e) { if (e.key === 'Enter') startAnalysis(); });
 
-// ============================================================================
 // NAVIGATION
-// ============================================================================
-
 document.getElementById('nav').addEventListener('click', function(e) {
-    if (e.target.classList.contains('nav-btn')) {
-        showSection(e.target.dataset.section);
-    }
+    var b = e.target.closest('.nb');
+    if (b && b.dataset.s) showSection(b.dataset.s);
 });
 
 function showSection(name) {
-    currentSection = name;
-    document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.section === name); });
-    document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+    curSec = name;
+    document.querySelectorAll('.nb').forEach(function(b) { b.classList.toggle('on', b.dataset.s === name); });
+    document.querySelectorAll('.sec').forEach(function(s) { s.classList.remove('on'); });
     var el = document.getElementById('sec-' + name);
-    if (el) el.classList.add('active');
-
-    var renderers = {
-        summary: renderSummary, triggers: renderTriggers, honeypots: renderHoneypots,
-        anticheats: renderAnticheats, obfuscation: renderObfuscation, natives: renderNatives,
-        callbacks: renderCallbacks, security: renderSecurity, manifests: renderManifests,
-        chains: renderChains, clones: renderClones
-    };
-    if (renderers[name] && DATA) renderers[name]();
+    if (el) el.classList.add('on');
+    var r = {summary:renderSummary, exploitable:renderExploitable, knowndb:renderKnownDB,
+             triggers:renderTriggers, honeypots:renderHoneypots, webhooks:renderWebhooks,
+             anticheats:renderAnticheats, backdoors:renderBackdoors, locations:renderLocations, search:function(){}};
+    if (r[name] && DATA) r[name]();
 }
 
-// ============================================================================
 // HELPERS
-// ============================================================================
-
 function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
-function riskClass(s) { return s >= 70 ? 'risk-danger' : s >= 40 ? 'risk-warn' : 'risk-safe'; }
+function riskCls(s) { return s >= 70 ? 'rc' : s >= 40 ? 'rw' : 'rs'; }
 function riskColor(s) { return s >= 70 ? 'var(--red)' : s >= 40 ? 'var(--yellow)' : 'var(--green)'; }
-function tagHTML(t, c) { return '<span class="tag tag-' + c + '">' + esc(t) + '</span>'; }
+function tagHTML(t, c) { return '<span class="tag t-' + c + '">' + esc(t) + '</span>'; }
 function confBar(v) {
     var p = Math.round(v * 100);
     var c = v > 0.7 ? 'var(--red)' : v > 0.3 ? 'var(--yellow)' : 'var(--green)';
-    return p + '% <span class="conf-bar"><span class="conf-fill" style="width:' + p + '%;background:' + c + '"></span></span>';
+    return p + '% <span class="cb"><span class="cbf" style="width:' + p + '%;background:' + c + '"></span></span>';
 }
 function shortPath(p) { if (!p) return ''; var a = p.replace(/\\/g, '/').split('/'); return a.length > 2 ? '.../' + a.slice(-2).join('/') : p; }
-function showToast(m) { var t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2500); }
+function showToast(m) { var t = document.getElementById('toast'); t.textContent = m; t.classList.add('on'); setTimeout(function() { t.classList.remove('on'); }, 2500); }
 function downloadJSON() {
     if (!DATA) return;
     var b = new Blob([JSON.stringify(DATA, null, 2)], {type: 'application/json'});
     var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'red_shadow_report.json'; a.click();
-    showToast('Reporte JSON descargado');
+    showToast('JSON descargado');
+}
+function copyText(txt, label) {
+    navigator.clipboard.writeText(txt).then(function() { showToast('Copiado: ' + (label||'')); }).catch(function() { showToast(txt.substring(0,60)); });
+}
+function buildTriggerLine(name, rewardType) {
+    var line = 'TriggerServerEvent("' + name + '"';
+    if (rewardType === 'money') line += ', 999999';
+    else if (rewardType === 'item') line += ', "bread", 100';
+    else if (rewardType === 'xp') line += ', 10000';
+    return line + ')';
 }
 
-// ============================================================================
 // RENDER: SUMMARY
-// ============================================================================
-
 function renderSummary() {
     var s = DATA.stats; var triggers = DATA.triggers || [];
-    var safe = triggers.filter(function(t) { return t.risk_score < 40; }).length;
-    var warn = triggers.filter(function(t) { return t.risk_score >= 40 && t.risk_score < 70; }).length;
-    var danger = triggers.filter(function(t) { return t.risk_score >= 70; }).length;
     var honeypots = triggers.filter(function(t) { return t.is_honeypot; }).length;
+    var exploitable = triggers.filter(function(t) { return !t.is_honeypot && t.has_reward_logic; }).length;
+    var knownReady = (DATA.known_triggers || []).filter(function(k) { return k.ready_to_use; }).length;
     var oR = triggers.length > 0 ? triggers.reduce(function(a, t) { return a + t.risk_score; }, 0) / triggers.length : 0;
 
     document.getElementById('stats-grid').innerHTML = [
-        {v: s.lua_files, l: 'Archivos Lua', c: 'var(--cyan)'}, {v: s.total_lines, l: 'Lineas', c: 'var(--cyan)'},
-        {v: s.functions, l: 'Funciones', c: 'var(--cyan)'}, {v: s.triggers, l: 'Triggers', c: 'var(--cyan)'},
-        {v: safe, l: 'Seguros', c: 'var(--green)'}, {v: warn, l: 'Advertencia', c: 'var(--yellow)'},
-        {v: danger, l: 'Peligrosos', c: 'var(--red)'}, {v: honeypots, l: 'Honeypots', c: 'var(--critical)'},
-        {v: s.callbacks, l: 'Callbacks', c: 'var(--cyan)'}, {v: s.natives, l: 'Natives', c: 'var(--cyan)'},
-        {v: s.obfuscations, l: 'Ofuscacion', c: 'var(--magenta)'}, {v: s.security_issues, l: 'Seguridad', c: 'var(--red)'},
-        {v: s.anticheats, l: 'Anticheats', c: 'var(--yellow)'}
-    ].map(function(i) { return '<div class="stat-box"><div class="stat-value" style="color:' + i.c + '">' + i.v + '</div><div class="stat-label">' + i.l + '</div></div>'; }).join('');
+        {v: s.triggers, l: 'Triggers', c: 'var(--cyan)'},
+        {v: exploitable, l: 'Explotables', c: 'var(--green)'},
+        {v: knownReady, l: 'Known DB Listos', c: 'var(--mag)'},
+        {v: honeypots, l: 'Honeypots', c: 'var(--crit)'},
+        {v: s.backdoors || 0, l: 'Backdoors', c: 'var(--crit)'},
+        {v: s.anticheats, l: 'Anticheats', c: 'var(--yellow)'},
+        {v: s.webhooks || 0, l: 'Webhooks', c: 'var(--ora)'},
+        {v: s.rp_locations || 0, l: 'Ubicaciones', c: 'var(--cyan)'}
+    ].map(function(i) {
+        return '<div class="sbox"><div class="sval" style="color:' + i.c + '">' + i.v + '</div><div class="slbl">' + i.l + '</div></div>';
+    }).join('');
 
     var rc = riskColor(oR);
-    document.getElementById('risk-display').innerHTML = '<div style="font-size:36px;font-weight:bold;color:' + rc + ';margin-bottom:8px">' + oR.toFixed(1) + '%</div><div class="risk-meter"><div class="risk-fill" style="width:' + oR + '%;background:' + rc + '"></div></div>';
-
+    document.getElementById('risk-display').innerHTML = '<div style="font-size:36px;font-weight:bold;color:' + rc + ';margin-bottom:8px">' + oR.toFixed(1) + '%</div>';
     var recs = DATA.recommendations || [];
-    document.getElementById('recommendations').innerHTML = recs.length > 0 ? recs.map(function(r) { return '<li>' + esc(r) + '</li>'; }).join('') : '<li>No se generaron recomendaciones.</li>';
+    document.getElementById('recommendations').innerHTML = recs.length > 0 ? recs.map(function(r) { return '<li>' + esc(r) + '</li>'; }).join('') : '<li>Sin recomendaciones.</li>';
 }
 
-// ============================================================================
-// RENDER: TRIGGERS
-// ============================================================================
+// RENDER: EXPLOITABLE — action cards X9-style
+var exploitableFilter = 'all';
 
+function renderExploitable() {
+    var triggers = (DATA.triggers || []).filter(function(t) { return !t.is_honeypot && t.has_reward_logic; });
+    if (exploitableFilter !== 'all') {
+        if (exploitableFilter === 'other') {
+            triggers = triggers.filter(function(t) { return !t.reward_type || (t.reward_type !== 'money' && t.reward_type !== 'item' && t.reward_type !== 'xp'); });
+        } else {
+            triggers = triggers.filter(function(t) { return t.reward_type === exploitableFilter; });
+        }
+    }
+    triggers.sort(function(a, b) { return a.risk_score - b.risk_score; });
+
+    if (triggers.length === 0) {
+        document.getElementById('exploitable-content').innerHTML = '<p style="color:var(--yellow);padding:20px">No hay triggers explotables con estos filtros.</p>';
+        return;
+    }
+
+    var html = '<p style="margin-bottom:12px;color:var(--t2);font-size:12px"><strong style="color:var(--green)">' + triggers.length + '</strong> triggers explotables</p>';
+    triggers.forEach(function(t) {
+        var line = buildTriggerLine(t.event_name, t.reward_type);
+        var rIcon = t.reward_type === 'money' ? '💰' : t.reward_type === 'item' ? '📦' : t.reward_type === 'xp' ? '⭐' : '🔧';
+        var safeTag = !t.has_validation ? '<span class="tag t-safe">SIN VAL</span>' : '<span class="tag t-warn">CON VAL</span>';
+        var rlTag = !t.has_rate_limiting ? '' : '<span class="tag t-warn">RATE LIMIT</span>';
+        var riskTag = '<span class="' + riskCls(t.risk_score) + '" style="font-size:11px">' + t.risk_score.toFixed(0) + '%</span>';
+        var safeId = 'xc_' + t.event_name.replace(/[^a-zA-Z0-9]/g,'_');
+        html += '<div class="xcard">';
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div class="xname">' + rIcon + ' ' + esc(t.event_name) + '</div>';
+        html += '<div class="xline">' + esc(line) + '</div>';
+        html += '<div class="xmeta">' + safeTag + ' ' + rlTag + ' ' + riskTag + ' &nbsp; <span style="color:var(--t3)">' + esc(shortPath(t.file)) + ':' + t.line + '</span></div>';
+        html += '</div>';
+        html += '<button class="xcopy" id="' + safeId + '" onclick="copyText(' + JSON.stringify(line) + ',' + JSON.stringify(t.event_name) + ')">📋 Copiar</button>';
+        html += '</div>';
+    });
+    document.getElementById('exploitable-content').innerHTML = html;
+}
+
+document.getElementById('exploitable-filters').addEventListener('click', function(e) {
+    var b = e.target.closest('.fb');
+    if (b) {
+        exploitableFilter = b.dataset.filter;
+        document.querySelectorAll('#exploitable-filters .fb').forEach(function(x) { x.classList.toggle('on', x.dataset.filter === exploitableFilter); });
+        renderExploitable();
+    }
+});
+
+// RENDER: TRIGGERS
 function renderTriggers() {
     var triggers = DATA.triggers || [];
     var search = (document.getElementById('trigger-search').value || '').toLowerCase();
@@ -807,256 +563,405 @@ function renderTriggers() {
         if (triggerFilter === 'safe') return t.risk_score < 40;
         if (triggerFilter === 'warn') return t.risk_score >= 40 && t.risk_score < 70;
         if (triggerFilter === 'danger') return t.risk_score >= 70;
+        if (triggerFilter === 'novalidation') return !t.has_validation;
+        if (triggerFilter === 'reward') return t.has_reward_logic;
         return true;
     });
     filtered.sort(function(a, b) { return b.risk_score - a.risk_score; });
 
-    var html = '<table class="data-table"><tr><th>Trigger</th><th>Tipo</th><th>Archivo</th><th>Reward</th><th>Riesgo</th><th>Tags</th></tr>';
+    if (filtered.length === 0) {
+        document.getElementById('triggers-table-wrap').innerHTML = '<p style="color:var(--t2);padding:20px">Sin resultados.</p>';
+        return;
+    }
+
+    var html = '<p style="margin-bottom:10px;color:var(--t2);font-size:12px">Total: <strong style="color:var(--cyan)">' + filtered.length + '</strong></p>';
+    html += '<table class="dt"><tr><th>Trigger</th><th>Tipo</th><th>Archivo</th><th>Tags</th><th>Riesgo</th><th>Copiar</th></tr>';
     filtered.forEach(function(t) {
         var tags = '';
-        if (t.is_honeypot) tags += tagHTML('HONEYPOT', 'honeypot');
+        if (t.is_honeypot) tags += tagHTML('HONEYPOT', 'hp');
         if (t.has_ban_logic) tags += tagHTML('BAN', 'ban');
         if (t.has_validation) tags += tagHTML('VAL', 'val');
         if (t.has_reward_logic) tags += tagHTML(t.reward_type || 'REWARD', 'info');
-        html += '<tr><td class="mono">' + esc(t.event_name) + '</td><td>' + esc(t.event_type) + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(t.file)) + ':' + t.line + '</td><td>' + esc(t.reward_type) + '</td><td class="' + riskClass(t.risk_score) + '" style="font-weight:bold">' + t.risk_score.toFixed(0) + '%</td><td>' + tags + '</td></tr>';
+        var line = buildTriggerLine(t.event_name, t.reward_type);
+        html += '<tr>';
+        html += '<td class="mono" style="color:var(--green)">' + esc(t.event_name) + '</td>';
+        html += '<td>' + esc(t.event_type) + '</td>';
+        html += '<td class="mono" style="font-size:11px">' + esc(shortPath(t.file)) + ':' + t.line + '</td>';
+        html += '<td>' + tags + '</td>';
+        html += '<td class="' + riskCls(t.risk_score) + '" style="font-weight:bold">' + t.risk_score.toFixed(0) + '%</td>';
+        html += '<td><button class="xcopy" style="padding:4px 10px;font-size:11px" onclick="copyText(' + JSON.stringify(line) + ',' + JSON.stringify(t.event_name) + ')">📋</button></td>';
+        html += '</tr>';
     });
     html += '</table>';
-    if (filtered.length === 0) html = '<p style="color:var(--text-secondary);padding:20px">No se encontraron triggers con estos filtros.</p>';
     document.getElementById('triggers-table-wrap').innerHTML = html;
 }
 
-document.getElementById('trigger-search').addEventListener('input', function() { if (currentSection === 'triggers') renderTriggers(); });
+document.getElementById('trigger-search').addEventListener('input', function() { if (curSec === 'triggers') renderTriggers(); });
 document.getElementById('trigger-filters').addEventListener('click', function(e) {
-    if (e.target.classList.contains('filter-btn')) {
-        triggerFilter = e.target.dataset.filter;
-        document.querySelectorAll('#trigger-filters .filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.filter === triggerFilter); });
+    var b = e.target.closest('.fb');
+    if (b) {
+        triggerFilter = b.dataset.filter;
+        document.querySelectorAll('#trigger-filters .fb').forEach(function(x) { x.classList.toggle('on', x.dataset.filter === triggerFilter); });
         renderTriggers();
     }
 });
 
-// ============================================================================
 // RENDER: HONEYPOTS
-// ============================================================================
-
 function renderHoneypots() {
     var triggers = (DATA.triggers || []).filter(function(t) { return t.is_honeypot; });
     if (triggers.length === 0) { document.getElementById('honeypots-content').innerHTML = '<p style="color:var(--green)">No se detectaron honeypots.</p>'; return; }
-    var html = '<table class="data-table"><tr><th>Trigger</th><th>Tipo</th><th>Archivo</th><th>Ban</th><th>Reward</th><th>Riesgo</th></tr>';
+    var html = '<table class="dt"><tr><th>Trigger</th><th>Tipo</th><th>Archivo</th><th>Ban</th><th>Riesgo</th></tr>';
     triggers.forEach(function(t) {
-        html += '<tr><td class="mono" style="color:var(--critical)">' + esc(t.event_name) + '</td><td>' + esc(t.event_type) + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(t.file)) + ':' + t.line + '</td><td>' + (t.has_ban_logic ? tagHTML('SI', 'danger') : 'NO') + '</td><td>' + (t.has_reward_logic ? tagHTML('SI', 'warn') : 'NO') + '</td><td class="risk-danger" style="font-weight:bold">' + t.risk_score.toFixed(0) + '%</td></tr>';
+        html += '<tr><td class="mono" style="color:var(--crit)">' + esc(t.event_name) + '</td><td>' + esc(t.event_type) + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(t.file)) + ':' + t.line + '</td><td>' + (t.has_ban_logic ? tagHTML('SI', 'danger') : 'NO') + '</td><td class="rc" style="font-weight:bold">' + t.risk_score.toFixed(0) + '%</td></tr>';
     });
     html += '</table>';
     document.getElementById('honeypots-content').innerHTML = html;
 }
 
-// ============================================================================
 // RENDER: ANTICHEATS
-// ============================================================================
-
 function renderAnticheats() {
     var acs = DATA.anticheats || {}; var keys = Object.keys(acs);
-    if (keys.length === 0) { document.getElementById('anticheats-content').innerHTML = '<p style="color:var(--green)">No se detectaron anticheats.</p>'; return; }
-    var html = '<table class="data-table"><tr><th>Anticheat</th><th>Confianza</th><th>Descripcion</th><th>Firmas</th></tr>';
-    keys.forEach(function(n) { var a = acs[n]; html += '<tr><td style="font-weight:bold;color:var(--yellow)">' + esc(n) + '</td><td>' + confBar(a.confidence) + '</td><td style="font-size:12px">' + esc(a.description) + '</td><td class="mono" style="font-size:11px">' + esc((a.matched_signatures || []).join(', ')) + '</td></tr>'; });
-    html += '</table>';
+    if (keys.length === 0) { document.getElementById('anticheats-content').innerHTML = '<div class="card"><p style="color:var(--green)">No se detectaron anticheats.</p></div>'; return; }
+    var html = '';
+    keys.forEach(function(n) {
+        var a = acs[n];
+        var isFramework = a.risk_level === 'FRAMEWORK';
+        var rlColor = {HIGH:'var(--red)', MEDIUM:'var(--yellow)', LOW:'var(--green)', FRAMEWORK:'var(--cyan)', UNKNOWN:'var(--t3)'}[a.risk_level] || 'var(--t3)';
+        var safeIcon = a.safe_to_disable === true ? '<span style="color:var(--green)">✅ Seguro deshabilitar</span>' : a.safe_to_disable === false ? '<span style="color:var(--red)">⛔ NO deshabilitar</span>' : '<span style="color:var(--yellow)">⚠️ Verificar</span>';
+        var borderColor = isFramework ? 'var(--cyan)' : a.safe_to_disable === false ? 'var(--red)' : 'var(--border)';
+        html += '<div class="accard" style="border-left:3px solid ' + borderColor + ';margin-bottom:12px">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+        html += '<div style="font-size:15px;font-weight:bold;color:' + rlColor + '">' + esc(n) + '</div>';
+        html += '<div>' + safeIcon + ' &nbsp; ' + confBar(a.confidence) + '</div></div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:12px">';
+        html += '<div><span style="color:var(--t2)">Descripcion: </span>' + esc(a.description) + '</div>';
+        html += '<div><span style="color:var(--t2)">Deteccion: </span>' + esc(a.detection_method || 'Desconocido') + '</div>';
+        html += '</div>';
+        if (a.disable_method) {
+            html += '<div style="margin-top:8px;padding:8px;background:var(--bg);border-radius:4px;font-size:12px"><span style="color:var(--t2)">Como abordar: </span>' + esc(a.disable_method) + '</div>';
+        }
+        if (a.bypass_notes) {
+            html += '<div style="margin-top:6px;padding:8px;background:rgba(0,204,102,.05);border-radius:4px;font-size:12px;color:var(--green)">' + esc(a.bypass_notes) + '</div>';
+        }
+        html += '</div>';
+    });
     document.getElementById('anticheats-content').innerHTML = html;
 }
 
-// ============================================================================
-// RENDER: OBFUSCATION
-// ============================================================================
-
-function renderObfuscation() {
-    var obfs = DATA.obfuscations || [];
-    if (obfs.length === 0) { document.getElementById('obfuscation-content').innerHTML = '<div class="card"><p style="color:var(--green)">No se detecto ofuscacion.</p></div>'; return; }
-    var byType = {}; obfs.forEach(function(o) { if (!byType[o.obf_type]) byType[o.obf_type] = []; byType[o.obf_type].push(o); });
-    var types = Object.keys(byType).sort(function(a, b) { return byType[b].length - byType[a].length; });
-    var fHTML = '<button class="filter-btn active" data-obf="all">Todos (' + obfs.length + ')</button>';
-    types.forEach(function(t) { fHTML += '<button class="filter-btn" data-obf="' + t + '">' + t + ' (' + byType[t].length + ')</button>'; });
-    document.getElementById('obf-filters').innerHTML = fHTML;
-    renderObfTable('all');
-    document.getElementById('obf-filters').onclick = function(e) { if (e.target.classList.contains('filter-btn')) { var f = e.target.dataset.obf; document.querySelectorAll('#obf-filters .filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.obf === f); }); renderObfTable(f); } };
-}
-function renderObfTable(filter) {
-    var obfs = DATA.obfuscations || [];
-    if (filter !== 'all') obfs = obfs.filter(function(o) { return o.obf_type === filter; });
-    obfs.sort(function(a, b) { return b.confidence - a.confidence; });
-    var html = '<div class="card"><table class="data-table"><tr><th>Tipo</th><th>Archivo</th><th>Confianza</th><th>Snippet</th></tr>';
-    obfs.slice(0, 100).forEach(function(o) { html += '<tr><td>' + tagHTML(o.obf_type, 'obf') + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(o.file)) + ':' + o.line + '</td><td>' + confBar(o.confidence) + '</td><td class="mono" style="font-size:11px;max-width:400px;overflow:hidden;text-overflow:ellipsis">' + esc(o.snippet) + '</td></tr>'; });
-    if (obfs.length > 100) html += '<tr><td colspan="4" style="color:var(--text-dim)">... y ' + (obfs.length - 100) + ' mas</td></tr>';
-    html += '</table></div>';
-    document.getElementById('obfuscation-content').innerHTML = html;
+// RENDER: BACKDOORS
+function renderBackdoors() {
+    var backdoors = DATA.backdoors || [];
+    if (backdoors.length === 0) { document.getElementById('backdoors-content').innerHTML = '<p style="color:var(--green)">No se detectaron backdoors.</p>'; return; }
+    backdoors.sort(function(a, b) { return (a.severity === 'CRITICAL' ? 0 : 1) - (b.severity === 'CRITICAL' ? 0 : 1); });
+    var st = {CRITICAL:'crit', HIGH:'danger'};
+    var html = '<table class="dt"><tr><th>Tipo</th><th>Severidad</th><th>Confianza</th><th>Archivo</th><th>Descripcion</th></tr>';
+    backdoors.forEach(function(b) {
+        html += '<tr><td>' + esc(b.backdoor_type.replace(/_/g,' ')) + '</td><td>' + tagHTML(b.severity, st[b.severity]||'danger') + '</td><td>' + confBar(b.confidence) + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(b.file)) + ':' + b.line + '</td><td style="font-size:12px">' + esc(b.description) + '</td></tr>';
+    });
+    html += '</table>';
+    document.getElementById('backdoors-content').innerHTML = html;
 }
 
-// ============================================================================
-// RENDER: NATIVES
-// ============================================================================
+// RENDER: LOCATIONS
+var locationFilter = 'all';
 
-function renderNatives() {
-    var natives = DATA.natives || [];
-    if (natives.length === 0) { document.getElementById('natives-content').innerHTML = '<div class="card"><p style="color:var(--green)">No se detectaron natives.</p></div>'; return; }
-    var byCat = {}; natives.forEach(function(n) { if (!byCat[n.category]) byCat[n.category] = []; byCat[n.category].push(n); });
-    var cats = Object.keys(byCat).sort(function(a, b) { return byCat[b].length - byCat[a].length; });
-    var fHTML = '<button class="filter-btn active" data-nat="all">Todos (' + natives.length + ')</button>';
-    cats.forEach(function(c) { fHTML += '<button class="filter-btn" data-nat="' + c + '">' + c + ' (' + byCat[c].length + ')</button>'; });
-    document.getElementById('native-filters').innerHTML = fHTML;
-    renderNativesTable('all');
-    document.getElementById('native-filters').onclick = function(e) { if (e.target.classList.contains('filter-btn')) { var f = e.target.dataset.nat; document.querySelectorAll('#native-filters .filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.nat === f); }); renderNativesTable(f); } };
-}
-function renderNativesTable(filter) {
-    var natives = DATA.natives || [];
-    if (filter !== 'all') natives = natives.filter(function(n) { return n.category === filter; });
-    var cc = {WEAPON:'danger',MONEY:'danger',PLAYER:'warn',NETWORK:'warn',VEHICLE:'info',WORLD:'info',UNKNOWN:'info'};
-    var html = '<div class="card"><table class="data-table"><tr><th>Native</th><th>Categoria</th><th>Archivo</th></tr>';
-    natives.slice(0, 100).forEach(function(n) { html += '<tr><td class="mono">' + esc(n.native_hash) + '</td><td>' + tagHTML(n.category, cc[n.category] || 'info') + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(n.file)) + ':' + n.line + '</td></tr>'; });
-    if (natives.length > 100) html += '<tr><td colspan="3" style="color:var(--text-dim)">... y ' + (natives.length - 100) + ' mas</td></tr>';
-    html += '</table></div>';
-    document.getElementById('natives-content').innerHTML = html;
+var drugColors = {
+    weed:    '#00cc66',
+    meth:    '#00cccc',
+    cocaine: '#e0e0e0',
+    heroin:  '#cc66ff',
+    mdma:    '#ff8833',
+    lsd:     '#ff3344',
+    mush:    '#cc9900',
+    generic: '#888'
+};
+var drugIcons = {
+    weed:'🌿', meth:'🧪', cocaine:'❄️', heroin:'💉', mdma:'💊', lsd:'🔮', mush:'🍄', generic:'🎯'
+};
+
+function getDrugType(loc) {
+    if (loc.drug_type) return loc.drug_type;
+    var parts = (loc.activity_type || '').split('_');
+    if (parts[0] === 'drug' && parts.length >= 2) return parts[1];
+    return 'generic';
 }
 
-// ============================================================================
-// RENDER: CALLBACKS
-// ============================================================================
-
-function renderCallbacks() {
-    var cbs = DATA.callbacks || [];
-    if (cbs.length === 0) { document.getElementById('callbacks-content').innerHTML = '<div class="card"><p style="color:var(--green)">No se detectaron callbacks.</p></div>'; return; }
-    cbs.sort(function(a, b) { return b.risk_score - a.risk_score; });
-    var html = '<div class="card"><table class="data-table"><tr><th>Callback</th><th>Archivo</th><th>Validacion</th><th>Riesgo</th></tr>';
-    cbs.forEach(function(cb) { html += '<tr><td class="mono">' + esc(cb.name) + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(cb.file)) + ':' + cb.line + '</td><td>' + (cb.has_validation ? tagHTML('SI', 'safe') : tagHTML('NO', 'danger')) + '</td><td class="' + riskClass(cb.risk_score) + '" style="font-weight:bold">' + cb.risk_score.toFixed(0) + '%</td></tr>'; });
-    html += '</table></div>';
-    document.getElementById('callbacks-content').innerHTML = html;
+function getIllegalType(loc) {
+    var at = loc.activity_type || '';
+    if (at.startsWith('illegal_')) return at.replace('illegal_', '');
+    return null;
 }
 
-// ============================================================================
-// RENDER: SECURITY
-// ============================================================================
-
-function renderSecurity() {
-    var issues = DATA.security_issues || [];
-    if (issues.length === 0) { document.getElementById('security-content').innerHTML = '<div class="card"><p style="color:var(--green)">No se detectaron vulnerabilidades.</p></div>'; return; }
-    var byType = {}; issues.forEach(function(i) { if (!byType[i.issue_type]) byType[i.issue_type] = []; byType[i.issue_type].push(i); });
-    var types = Object.keys(byType);
-    var fHTML = '<button class="filter-btn active" data-sec="all">Todos (' + issues.length + ')</button>';
-    types.forEach(function(t) { fHTML += '<button class="filter-btn" data-sec="' + t + '">' + t + ' (' + byType[t].length + ')</button>'; });
-    document.getElementById('security-filters').innerHTML = fHTML;
-    renderSecurityTable('all');
-    document.getElementById('security-filters').onclick = function(e) { if (e.target.classList.contains('filter-btn')) { var f = e.target.dataset.sec; document.querySelectorAll('#security-filters .filter-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.sec === f); }); renderSecurityTable(f); } };
-}
-function renderSecurityTable(filter) {
-    var issues = DATA.security_issues || [];
-    if (filter !== 'all') issues = issues.filter(function(i) { return i.issue_type === filter; });
-    var so = {CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3};
-    issues.sort(function(a, b) { return (so[a.severity] || 9) - (so[b.severity] || 9); });
-    var st = {CRITICAL:'critical', HIGH:'danger', MEDIUM:'warn', LOW:'safe'};
-    var html = '<div class="card"><table class="data-table"><tr><th>Tipo</th><th>Severidad</th><th>Archivo</th><th>Descripcion</th><th>Snippet</th></tr>';
-    issues.slice(0, 100).forEach(function(i) { html += '<tr><td>' + esc(i.issue_type) + '</td><td>' + tagHTML(i.severity, st[i.severity] || 'info') + '</td><td class="mono" style="font-size:11px">' + esc(shortPath(i.file)) + ':' + i.line + '</td><td style="font-size:12px">' + esc(i.description) + '</td><td class="mono" style="font-size:11px;max-width:300px;overflow:hidden;text-overflow:ellipsis">' + esc(i.snippet) + '</td></tr>'; });
-    html += '</table></div>';
-    document.getElementById('security-content').innerHTML = html;
+function getOperationType(loc) {
+    var parts = (loc.activity_type || '').split('_');
+    if (parts[0] === 'drug' && parts.length >= 3) return parts.slice(2).join('_');
+    return '';
 }
 
+function getScriptName(loc) {
+    var fp = loc.file_path || '';
+    var parts = fp.replace(/\\/g, '/').split('/');
+    if (parts.length >= 2) return parts[parts.length - 2];
+    return parts[parts.length - 1] || 'unknown';
+}
+
+function matchesFilter(loc, filter) {
+    if (filter === 'all') return true;
+    var at = loc.activity_type || '';
+    if (['weed','meth','cocaine','heroin','mdma','lsd','mush','generic'].indexOf(filter) >= 0) {
+        return getDrugType(loc) === filter;
+    }
+    if (filter === 'robbery') return at.startsWith('illegal_robbery') || at.startsWith('illegal_heist');
+    if (filter === 'chop_shop') return at.startsWith('illegal_chop');
+    if (filter === 'arms_dealing') return at.startsWith('illegal_arms');
+    if (filter === 'illegal_mining') return at.startsWith('illegal_mining');
+    if (filter === 'illegal_trade') return at.startsWith('illegal_trade');
+    return false;
+}
+
+function renderLocations() {
+    var locations = DATA.rp_locations || [];
+    if (locations.length === 0) { document.getElementById('locations-content').innerHTML = '<p style="color:var(--yellow);padding:20px">No se detectaron spots ilegales.</p>'; return; }
+    var filtered = locations.filter(function(loc) { return matchesFilter(loc, locationFilter); });
+    filtered.sort(function(a, b) { return b.risk_score - a.risk_score; });
+    var html = '<p style="margin-bottom:12px;color:var(--t2);font-size:12px">Total: <strong style="color:var(--cyan)">' + filtered.length + '</strong></p>';
+    filtered.forEach(function(loc) { html += renderLocationCard(loc); });
+    document.getElementById('locations-content').innerHTML = html;
+}
+
+function renderLocationCard(loc) {
+    var at = loc.activity_type || '';
+    var isIllegal = at.startsWith('illegal_');
+    var dtype = isIllegal ? null : getDrugType(loc);
+    var illegalType = isIllegal ? getIllegalType(loc) : null;
+    var illegalColors = {robbery:'#ff3344',heist:'#ff3344',chop_shop:'#ff8833',chop:'#ff8833',arms_dealing:'#cc66ff',arms:'#cc66ff',illegal_mining:'#cc9900',mining:'#cc9900',illegal_trade:'#888',trade:'#888'};
+    var dcolor = isIllegal ? (illegalColors[illegalType] || '#888') : (drugColors[dtype] || '#888');
+    var illegalIcons = {robbery:'\uD83D\uDD2B',heist:'\uD83D\uDD2B',chop_shop:'\uD83D\uDE97',chop:'\uD83D\uDE97',arms_dealing:'\uD83D\uDCA3',arms:'\uD83D\uDCA3',illegal_mining:'\u26CF\uFE0F',mining:'\u26CF\uFE0F',illegal_trade:'\uD83D\uDDA4',trade:'\uD83D\uDDA4'};
+    var dicon = isIllegal ? (illegalIcons[illegalType] || '\u26A0\uFE0F') : (drugIcons[dtype] || '\uD83C\uDFAF');
+    var opType = getOperationType(loc);
+    var opLabel = opType ? (' \u2014 ' + opType) : '';
+    var tagLabel = isIllegal ? (illegalType || 'ILLEGAL').toUpperCase() : (dtype || 'generic').toUpperCase() + opLabel;
+    var coords = loc.coords || {};
+    var coordStr = 'vector3(' + (coords.x||0).toFixed(1) + ', ' + (coords.y||0).toFixed(1) + ', ' + (coords.z||0).toFixed(1) + ')';
+    var scriptName = getScriptName(loc);
+    var card = '<div class="card" style="border-left:3px solid ' + dcolor + '">';
+    card += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
+    card += '<div style="font-size:14px;font-weight:bold;color:' + dcolor + '">' + dicon + ' ' + esc(loc.location_name) + '</div>';
+    card += '<div style="display:flex;align-items:center;gap:8px">';
+    card += '<span class="tag" style="background:' + dcolor + ';color:#000;font-weight:bold">' + tagLabel + '</span>';
+    card += '<span class="' + riskCls(loc.risk_score) + '" style="font-weight:bold">' + loc.risk_score.toFixed(0) + '%</span>';
+    card += '</div></div>';
+    card += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+    card += '<span class="mono" style="color:var(--cyan);font-size:12px">' + esc(coordStr) + '</span>';
+    card += '<button class="xcopy" style="padding:4px 10px;font-size:11px" onclick="copyText(' + JSON.stringify(coordStr) + ',\'coords\')">\uD83D\uDCCB</button>';
+    card += '</div>';
+    card += '<div style="font-size:11px;color:var(--t3);display:flex;gap:12px">';
+    card += '<span>\uD83D\uDCC1 <span style="color:var(--yellow)">' + esc(scriptName) + '</span></span>';
+    card += '<span>' + esc(shortPath(loc.file_path)) + ':' + loc.line_number + '</span>';
+    card += '</div>';
+    if (loc.context_code) card += '<div class="code" style="margin-top:8px;max-height:80px">' + esc(loc.context_code) + '</div>';
+    card += '</div>';
+    return card;
+}
+document.getElementById('location-filters').addEventListener('click', function(e) {
+    var b = e.target.closest('.fb');
+    if (b) {
+        locationFilter = b.dataset.filter;
+        document.querySelectorAll('#location-filters .fb').forEach(function(x) { x.classList.toggle('on', x.dataset.filter === locationFilter); });
+        renderLocations();
+    }
+});
+
 // ============================================================================
-// RENDER: MANIFESTS
+// EXPORT: LOCATIONS
 // ============================================================================
 
-function renderManifests() {
-    var manifests = DATA.manifests || [];
-    if (manifests.length === 0) { document.getElementById('manifests-content').innerHTML = '<div class="card"><p style="color:var(--green)">No se encontraron manifests.</p></div>'; return; }
-    var html = '';
-    manifests.forEach(function(m) {
-        html += '<div class="card"><div class="card-title" style="color:var(--yellow)">' + esc(m.resource_name) + (m.has_ui_page ? ' ' + tagHTML('NUI', 'obf') : '') + '</div>';
-        if (m.scripts_server.length) html += '<p><strong style="color:var(--cyan)">Server:</strong> <span class="mono" style="font-size:12px">' + m.scripts_server.map(esc).join(', ') + '</span></p>';
-        if (m.scripts_client.length) html += '<p><strong style="color:var(--cyan)">Client:</strong> <span class="mono" style="font-size:12px">' + m.scripts_client.map(esc).join(', ') + '</span></p>';
-        if (m.dependencies.length) html += '<p><strong style="color:var(--cyan)">Deps:</strong> <span class="mono" style="font-size:12px">' + m.dependencies.map(esc).join(', ') + '</span></p>';
-        if (m.exports.length) html += '<p><strong style="color:var(--cyan)">Exports:</strong> <span class="mono" style="font-size:12px">' + m.exports.map(esc).join(', ') + '</span></p>';
+function getFilteredLocations() {
+    var locations = (DATA && DATA.rp_locations) ? DATA.rp_locations : [];
+    if (locationFilter !== 'all') {
+        locations = locations.filter(function(loc) { return getDrugType(loc) === locationFilter; });
+    }
+    locations = locations.slice().sort(function(a, b) { return b.risk_score - a.risk_score; });
+    return locations;
+}
+
+function triggerDownload(content, filename, mimeType) {
+    var blob = new Blob([content], { type: mimeType });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function downloadLocationsCSV() {
+    var locations = getFilteredLocations();
+    if (locations.length === 0) { showToast('No hay ubicaciones para exportar'); return; }
+    var rows = ['name,x,y,z,activity,category,risk,confidence,file,line'];
+    locations.forEach(function(loc) {
+        var coords = loc.coords || {};
+        var row = [
+            '"' + (loc.location_name || '').replace(/"/g, '""') + '"',
+            (coords.x !== undefined ? coords.x : 0),
+            (coords.y !== undefined ? coords.y : 0),
+            (coords.z !== undefined ? coords.z : 0),
+            '"' + (loc.activity_type || '').replace(/"/g, '""') + '"',
+            '"' + (loc.category || '').replace(/"/g, '""') + '"',
+            (loc.risk_score !== undefined ? loc.risk_score : 0),
+            (loc.confidence !== undefined ? loc.confidence : 0),
+            '"' + (loc.file_path || '').replace(/"/g, '""') + '"',
+            (loc.line_number !== undefined ? loc.line_number : 0)
+        ];
+        rows.push(row.join(','));
+    });
+    triggerDownload(rows.join('\n'), 'locations.csv', 'text/csv;charset=utf-8;');
+    showToast('CSV exportado (' + locations.length + ' ubicaciones)');
+}
+
+function downloadLocationsJSON() {
+    var locations = getFilteredLocations();
+    if (locations.length === 0) { showToast('No hay ubicaciones para exportar'); return; }
+    var output = JSON.stringify({ locations: locations, count: locations.length, filter: locationFilter }, null, 2);
+    triggerDownload(output, 'locations.json', 'application/json');
+    showToast('JSON exportado (' + locations.length + ' ubicaciones)');
+}
+
+function downloadLocationsLua() {
+    var locations = getFilteredLocations();
+    if (locations.length === 0) { showToast('No hay ubicaciones para exportar'); return; }
+    var lines = ['-- RED-SHADOW DESTROYER v4 - Exported Locations', '-- Filter: ' + locationFilter, '-- Count: ' + locations.length, '', 'local Locations = {'];
+    locations.forEach(function(loc) {
+        var coords = loc.coords || {};
+        var x = (coords.x !== undefined ? coords.x : 0).toFixed(4);
+        var y = (coords.y !== undefined ? coords.y : 0).toFixed(4);
+        var z = (coords.z !== undefined ? coords.z : 0).toFixed(4);
+        var name = (loc.location_name || 'unknown').replace(/['"\\]/g, '_');
+        var activity = (loc.activity_type || 'unknown').replace(/['"\\]/g, '_');
+        lines.push('    {');
+        lines.push('        name = "' + name + '",');
+        lines.push('        coords = vector3(' + x + ', ' + y + ', ' + z + '),');
+        lines.push('        activity = "' + activity + '",');
+        lines.push('        category = "' + (loc.category || 'unknown') + '",');
+        lines.push('        risk = ' + (loc.risk_score !== undefined ? loc.risk_score.toFixed(1) : '0.0') + ',');
+        lines.push('    },');
+    });
+    lines.push('}');
+    lines.push('');
+    lines.push('return Locations');
+    triggerDownload(lines.join('\n'), 'locations.lua', 'text/plain;charset=utf-8;');
+    showToast('Lua exportado (' + locations.length + ' ubicaciones)');
+}
+
+// RENDER: WEBHOOKS
+function renderWebhooks() {
+    var webhooks = DATA.webhooks || [];
+    if (webhooks.length === 0) { document.getElementById('webhooks-content').innerHTML = '<p style="color:var(--green)">No se detectaron webhooks hardcodeados.</p>'; return; }
+    webhooks.sort(function(a, b) { return a.file.localeCompare(b.file); });
+    var html = '<p style="margin-bottom:10px;color:var(--t2);font-size:12px">Total: <strong style="color:var(--ora)">' + webhooks.length + '</strong></p>';
+    html += '<table class="dt"><tr><th>URL</th><th>Tipo</th><th>Archivo</th><th>Linea</th><th>Copiar</th></tr>';
+    webhooks.forEach(function(w) {
+        var typeColor = w.webhook_type === 'discord' ? 'var(--mag)' : 'var(--ora)';
+        html += '<tr>';
+        html += '<td class="mono" style="font-size:11px;max-width:360px;overflow:hidden;text-overflow:ellipsis;color:var(--cyan)">' + esc(w.url) + '</td>';
+        html += '<td><span class="tag" style="background:' + typeColor + ';color:#fff">' + esc(w.webhook_type.toUpperCase()) + '</span></td>';
+        html += '<td class="mono" style="font-size:11px">' + esc(shortPath(w.file)) + '</td>';
+        html += '<td>' + w.line + '</td>';
+        html += '<td><button class="xcopy" style="padding:4px 10px;font-size:11px" onclick="copyText(' + JSON.stringify(w.url) + ',\'webhook\')">📋</button></td>';
+        html += '</tr>';
+    });
+    html += '</table>';
+    document.getElementById('webhooks-content').innerHTML = html;
+}
+
+// RENDER: KNOWN DB
+var knowndbFilter = 'all';
+
+function renderKnownDB() {
+    var items = DATA.known_triggers || [];
+    if (items.length === 0) { document.getElementById('knowndb-content').innerHTML = '<div class="card"><p style="color:var(--yellow)">No se encontraron matches con la base de datos.</p></div>'; return; }
+
+    var filtered = items.filter(function(k) {
+        if (knowndbFilter === 'ready') return k.ready_to_use;
+        if (knowndbFilter === 'money') return k.category === 'money';
+        if (knowndbFilter === 'item') return k.category === 'item';
+        if (knowndbFilter === 'job') return k.category === 'job' || k.category === 'admin';
+        if (knowndbFilter === 'vehicle') return k.category === 'vehicle';
+        if (knowndbFilter === 'ESX') return k.framework === 'ESX';
+        if (knowndbFilter === 'QBCore') return k.framework === 'QBCore';
+        return true;
+    });
+
+    var ready = filtered.filter(function(k) { return k.ready_to_use; }).length;
+    var html = '<p style="margin-bottom:12px;color:var(--t2);font-size:12px">Matches: <strong style="color:var(--mag)">' + filtered.length + '</strong> — <strong style="color:var(--green)">' + ready + '</strong> listos</p>';
+    var riskColor2 = {CRITICAL:'var(--crit)',HIGH:'var(--red)',MEDIUM:'var(--yellow)',LOW:'var(--green)'};
+    var catIcon = {money:'💰',item:'📦',job:'👔',admin:'🔑',vehicle:'🚗',weapon:'🔫',framework:'⚙️'};
+
+    filtered.forEach(function(k) {
+        var rc = riskColor2[k.risk] || 'var(--t2)';
+        var icon = catIcon[k.category] || '🔧';
+        var readyBadge = k.ready_to_use ? '<span class="tag t-safe">✅ LISTO</span>' : (k.is_honeypot ? '<span class="tag t-hp">🍯 HONEYPOT</span>' : '<span class="tag t-warn">⚠️ VALIDADO</span>');
+        var partialBadge = k.partial_match ? '<span class="tag t-info" style="font-size:10px">~PARCIAL</span> ' : '';
+
+        html += '<div class="xcard" style="border-left:3px solid ' + rc + '">';
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div class="xname" style="color:' + rc + '">' + icon + ' ' + esc(k.name) + ' ' + partialBadge + readyBadge + '</div>';
+        if (k.exploit) html += '<div class="xline">' + esc(k.exploit) + '</div>';
+        html += '<div class="xmeta"><span class="tag t-info" style="font-size:10px">' + esc(k.framework) + '</span> <span class="tag" style="background:' + rc + ';color:#000;font-size:10px">' + esc(k.risk) + '</span>';
+        if (k.has_validation) html += ' <span style="color:var(--yellow)">⚠️ validacion</span>';
+        if (k.has_ban_logic) html += ' <span style="color:var(--red)">🚫 ban logic</span>';
+        if (k.file) html += ' <span style="color:var(--t3)">' + esc(k.file.split(/[\\/]/).slice(-2).join('/')) + ':' + k.line + '</span>';
+        html += '</div></div>';
+        if (k.exploit && k.ready_to_use) {
+            html += '<button class="xcopy" onclick="copyText(' + JSON.stringify(k.exploit) + ',\'exploit\')">📋 Copiar</button>';
+        }
         html += '</div>';
     });
-    document.getElementById('manifests-content').innerHTML = html;
+    document.getElementById('knowndb-content').innerHTML = html;
 }
 
-// ============================================================================
-// RENDER: CHAINS
-// ============================================================================
-
-function renderChains() {
-    var chains = DATA.trigger_chains || []; var cr = DATA.cross_references || {};
-    if (chains.length === 0) { document.getElementById('chains-content').innerHTML = '<p style="color:var(--green)">No se detectaron cadenas.</p>'; }
-    else {
-        var html = '';
-        chains.forEach(function(ch, i) { html += '<div class="chain-item"><strong style="color:var(--cyan);margin-right:8px">Cadena #' + (i+1) + ':</strong> '; ch.forEach(function(n, j) { html += '<span class="chain-node">' + esc(n) + '</span>'; if (j < ch.length - 1) html += '<span class="chain-arrow"> &rarr; </span>'; }); html += '</div>'; });
-        document.getElementById('chains-content').innerHTML = html;
+document.getElementById('knowndb-filters').addEventListener('click', function(e) {
+    var b = e.target.closest('.fb');
+    if (b) {
+        knowndbFilter = b.dataset.filter;
+        document.querySelectorAll('#knowndb-filters .fb').forEach(function(x) { x.classList.toggle('on', x.dataset.filter === knowndbFilter); });
+        renderKnownDB();
     }
-    var crk = Object.keys(cr);
-    if (crk.length === 0) { document.getElementById('crossrefs-content').innerHTML = '<p style="color:var(--text-secondary)">No se detectaron referencias cruzadas.</p>'; }
-    else {
-        var html2 = '<table class="data-table"><tr><th>Trigger</th><th>Archivos</th></tr>';
-        crk.forEach(function(n) { var f = cr[n]; html2 += '<tr><td class="mono" style="color:var(--cyan)">' + esc(n) + '</td><td class="mono" style="font-size:11px">' + (Array.isArray(f) ? f.map(esc).join(', ') : esc(String(f))) + '</td></tr>'; });
-        html2 += '</table>';
-        document.getElementById('crossrefs-content').innerHTML = html2;
-    }
-}
+});
 
-// ============================================================================
-// RENDER: CLONES
-// ============================================================================
-
-function renderClones() {
-    var clones = DATA.code_clones || [];
-    if (clones.length === 0) { document.getElementById('clones-content').innerHTML = '<p style="color:var(--green)">No se detecto codigo duplicado.</p>'; return; }
-    var html = '<p style="margin-bottom:12px">Total: <strong>' + clones.length + '</strong></p>';
-    html += '<table class="data-table"><tr><th>#</th><th>Ubicaciones</th></tr>';
-    clones.slice(0, 50).forEach(function(c, i) { html += '<tr><td style="color:var(--yellow)">#' + (i+1) + '</td><td class="mono" style="font-size:11px">' + c.map(esc).join('<br>') + '</td></tr>'; });
-    if (clones.length > 50) html += '<tr><td colspan="2" style="color:var(--text-dim)">... y ' + (clones.length - 50) + ' mas</td></tr>';
-    html += '</table>';
-    document.getElementById('clones-content').innerHTML = html;
-}
-
-// ============================================================================
 // GLOBAL SEARCH
-// ============================================================================
-
 document.getElementById('global-search').addEventListener('keydown', function(e) { if (e.key === 'Enter') doGlobalSearch(); });
 
 function doGlobalSearch() {
     var q = (document.getElementById('global-search').value || '').toLowerCase().trim();
     if (!q || !DATA) return;
     var triggers = (DATA.triggers || []).filter(function(t) { return t.event_name.toLowerCase().indexOf(q) !== -1; });
-    if (triggers.length === 0) { document.getElementById('search-results').innerHTML = '<div class="card"><p style="color:var(--yellow)">No se encontraron triggers con "' + esc(q) + '"</p></div>'; return; }
+    if (triggers.length === 0) { document.getElementById('search-results').innerHTML = '<div class="card"><p style="color:var(--yellow)">Sin resultados para "' + esc(q) + '"</p></div>'; return; }
     var html = '';
     triggers.forEach(function(t) {
+        var line = buildTriggerLine(t.event_name, t.reward_type);
         var tags = '';
-        if (t.is_honeypot) tags += tagHTML('HONEYPOT', 'honeypot') + ' ';
+        if (t.is_honeypot) tags += tagHTML('HONEYPOT', 'hp') + ' ';
         if (t.has_ban_logic) tags += tagHTML('BAN', 'ban') + ' ';
         if (t.has_validation) tags += tagHTML('VAL', 'val') + ' ';
-        html += '<div class="card"><div class="card-title" style="color:' + riskColor(t.risk_score) + '">' + esc(t.event_name) + ' ' + tags + '</div>' +
-            '<table style="width:100%;font-size:13px"><tr><td style="width:120px;color:var(--text-secondary)">Tipo</td><td>' + esc(t.event_type) + '</td></tr>' +
-            '<tr><td style="color:var(--text-secondary)">Archivo</td><td class="mono">' + esc(t.file) + ':' + t.line + '</td></tr>' +
-            '<tr><td style="color:var(--text-secondary)">Handler</td><td class="mono">' + esc(t.handler_function) + '</td></tr>' +
-            '<tr><td style="color:var(--text-secondary)">Parametros</td><td class="mono">' + esc((t.parameters || []).join(', ') || 'N/A') + '</td></tr>' +
-            '<tr><td style="color:var(--text-secondary)">Validacion</td><td>' + (t.has_validation ? '<span style="color:var(--green)">SI</span>' : '<span style="color:var(--red)">NO</span>') + '</td></tr>' +
-            '<tr><td style="color:var(--text-secondary)">Riesgo</td><td class="' + riskClass(t.risk_score) + '" style="font-weight:bold">' + t.risk_score.toFixed(1) + '%</td></tr></table>';
-        if (t.code_context) html += '<div style="margin-top:10px"><div style="color:var(--text-dim);font-size:11px;margin-bottom:4px">Contexto:</div><div class="code-block">' + esc(t.code_context) + '</div></div>';
+        html += '<div class="xcard">';
+        html += '<div style="flex:1;min-width:0">';
+        html += '<div class="xname" style="color:' + riskColor(t.risk_score) + '">' + esc(t.event_name) + ' ' + tags + '</div>';
+        html += '<div class="xline">' + esc(line) + '</div>';
+        html += '<div class="xmeta"><span class="mono" style="font-size:11px">' + esc(shortPath(t.file)) + ':' + t.line + '</span> &nbsp; <span class="' + riskCls(t.risk_score) + '">' + t.risk_score.toFixed(1) + '%</span></div>';
+        html += '</div>';
+        html += '<button class="xcopy" onclick="copyText(' + JSON.stringify(line) + ',' + JSON.stringify(t.event_name) + ')">📋 Copiar</button>';
         html += '</div>';
     });
     document.getElementById('search-results').innerHTML = html;
 }
 
-// ============================================================================
-// BOOT - check if data already available (e.g. passed via CLI)
-// ============================================================================
-
-fetch('/api/data').then(function(r) {
-    if (r.ok) return r.json();
-    return null;
-}).then(function(d) {
-    if (d && d.stats && d.triggers) {
-        DATA = d;
-        showDashboard();
-    }
-    // else stay on landing page
-}).catch(function() {
-    // stay on landing page
-});
+// BOOT
+fetch('/api/data').then(function(r) { if (r.ok) return r.json(); return null; }).then(function(d) {
+    if (d && d.stats && d.triggers) { DATA = d; showDashboard(); }
+}).catch(function() {});
 </script>
 </body>
 </html>"""
@@ -1122,16 +1027,25 @@ class RedShadowHandler(BaseHTTPRequestHandler):
             return
 
         dump_path = body.get('path', '').strip()
+        ambani_triggers = body.get('ambani_triggers', '').strip()
+
+        # Permitir análisis solo con triggers.lua de Ambani (sin dump completo)
+        ambani_only = False
+        if not dump_path and ambani_triggers:
+            # Modo Ambani-only: usar el directorio del triggers.lua como dump_path
+            ambani_only = True
+            dump_path = str(Path(ambani_triggers).parent)
+
         if not dump_path:
-            self._json_response({'error': 'Ruta del dump no proporcionada'}, status=400)
+            self._json_response({'error': 'Proporciona la ruta del dump o el triggers.lua de Ambani'}, status=400)
             return
 
         if not os.path.exists(dump_path):
             self._json_response({'error': f'Ruta no encontrada: {dump_path}'}, status=400)
             return
 
-        if not os.path.isdir(dump_path):
-            self._json_response({'error': 'La ruta debe ser un directorio'}, status=400)
+        if ambani_triggers and not os.path.exists(ambani_triggers):
+            self._json_response({'error': f'triggers.lua no encontrado: {ambani_triggers}'}, status=400)
             return
 
         if AppState.analysis_running:
@@ -1146,7 +1060,11 @@ class RedShadowHandler(BaseHTTPRequestHandler):
         AppState.report_data = None
         AppState.dump_path = dump_path
 
-        thread = threading.Thread(target=_run_analysis_thread, args=(dump_path,), daemon=True)
+        thread = threading.Thread(
+            target=_run_analysis_thread,
+            args=(dump_path, ambani_triggers, ambani_only),
+            daemon=True
+        )
         thread.start()
 
         self._json_response({'status': 'started', 'path': dump_path})
@@ -1160,43 +1078,140 @@ class RedShadowHandler(BaseHTTPRequestHandler):
 
 
 # ============================================================================
+# AMBANI FALLBACK PARSER (para versiones del engine sin parse_ambani_triggers_lua)
+# ============================================================================
+
+def _parse_ambani_fallback(engine, triggers_lua_path: str) -> int:
+    """Parsear triggers.lua de Ambani cuando el engine no tiene el método nativo."""
+    import re as _re
+    from pathlib import Path as _Path
+    try:
+        content = _Path(triggers_lua_path).read_text(encoding='utf-8', errors='ignore')
+    except Exception:
+        return 0
+
+    imported = 0
+    seen = set(engine.triggers.keys()) if hasattr(engine.triggers, 'keys') else set()
+
+    # Extraer nombres de eventos de cualquier formato común
+    patterns = [
+        r'(?:RegisterNetEvent|AddEventHandler|TriggerServerEvent|TriggerEvent)\s*\(\s*["\']([^"\']+)["\']',
+        r'["\']([a-zA-Z0-9_\-]+:[a-zA-Z0-9_\-:\.]+)["\']',
+    ]
+    for pat in patterns:
+        for m in _re.finditer(pat, content, _re.IGNORECASE):
+            name = m.group(1).strip()
+            if not name or name in seen:
+                continue
+            if ':' not in name and pat == patterns[1]:
+                continue
+            seen.add(name)
+            # Crear trigger mínimo compatible
+            try:
+                if hasattr(engine, '_build_trigger_from_name'):
+                    line_no = content[:m.start()].count('\n') + 1
+                    trigger = engine._build_trigger_from_name(name, triggers_lua_path, line_no)
+                    if hasattr(engine.triggers, '__setitem__'):
+                        engine.triggers[name] = trigger
+                    else:
+                        engine.triggers.append(trigger)
+                    imported += 1
+            except Exception:
+                pass
+
+    return imported
+
+
+# ============================================================================
 # ANALYSIS THREAD
 # ============================================================================
 
-def _run_analysis_thread(dump_path):
+def _run_analysis_thread(dump_path, ambani_triggers_path=None, ambani_only=False):
     """Ejecutar el analisis en un thread de background"""
     try:
-        # Importar el motor v4
         engine_dir = Path(__file__).parent.resolve()
         if str(engine_dir) not in sys.path:
             sys.path.insert(0, str(engine_dir))
 
-        from red_shadow_destroyer_v4 import RedShadowV4
+        try:
+            from red_shadow_destroyer_v4 import RedShadowV4
+        except ImportError:
+            # Fallback: el usuario copió el engine como main.py u otro nombre
+            import importlib.util as _ilu
+            _candidates = ['main', 'red_shadow', 'destroyer_v4', 'red_shadow_v4']
+            RedShadowV4 = None
+            for _cname in _candidates:
+                try:
+                    _mod = __import__(_cname)
+                    if hasattr(_mod, 'RedShadowV4'):
+                        RedShadowV4 = _mod.RedShadowV4
+                        break
+                except ImportError:
+                    pass
+            if RedShadowV4 is None:
+                # Buscar cualquier .py en engine_dir que tenga RedShadowV4
+                for _pyf in engine_dir.glob('*.py'):
+                    try:
+                        _spec = _ilu.spec_from_file_location('_rs_engine', _pyf)
+                        _mod = _ilu.module_from_spec(_spec)
+                        _spec.loader.exec_module(_mod)
+                        if hasattr(_mod, 'RedShadowV4'):
+                            RedShadowV4 = _mod.RedShadowV4
+                            break
+                    except Exception:
+                        pass
+            if RedShadowV4 is None:
+                raise ImportError("No se encontró RedShadowV4 en ningún archivo del directorio")
 
         AppState.analysis_progress = "Cargando archivos del dump..."
         engine = RedShadowV4(dump_path)
 
         file_count = engine.load_files()
-        if file_count == 0:
-            AppState.analysis_error = "No se encontraron archivos Lua en el dump"
+
+        # Importar triggers.lua de Ambani si se proporcionó
+        ambani_imported = 0
+        if ambani_triggers_path:
+            AppState.analysis_progress = "Importando triggers.lua de Ambani..."
+            if hasattr(engine, 'parse_ambani_triggers_lua'):
+                ambani_imported = engine.parse_ambani_triggers_lua(ambani_triggers_path)
+            else:
+                # Fallback: parsear manualmente si el engine no tiene el método
+                ambani_imported = _parse_ambani_fallback(engine, ambani_triggers_path)
+
+        if file_count == 0 and ambani_imported == 0:
+            AppState.analysis_error = "No se encontraron archivos Lua ni triggers de Ambani"
             AppState.analysis_running = False
             return
 
-        AppState.analysis_progress = f"{file_count} archivos Lua cargados. Ejecutando analisis..."
+        if ambani_only and ambani_imported > 0:
+            AppState.analysis_progress = f"{ambani_imported} triggers importados de Ambani. Analizando..."
+        else:
+            extra = f", {ambani_imported} triggers de Ambani" if ambani_imported else ""
+            AppState.analysis_progress = f"{file_count} archivos Lua cargados{extra}. Ejecutando analisis..."
 
-        # Run each phase with progress updates
-        phases = [
-            ("Extrayendo funciones...", engine.extract_functions),
-            ("Detectando triggers...", engine.detect_triggers),
-            ("Escaneando ofuscacion...", engine.detect_obfuscation),
-            ("Analizando natives...", engine.analyze_natives),
-            ("Analizando callbacks...", engine.analyze_callbacks),
-            ("Analizando manifests...", engine.analyze_manifests),
-            ("Escaneando seguridad...", engine.detect_security_issues),
-            ("Fingerprinting anticheats...", engine.fingerprint_anticheats),
-            ("Analizando cadenas de triggers...", engine.analyze_trigger_chains),
-            ("Detectando codigo duplicado...", engine.detect_code_clones),
-        ]
+        def _phase(name, method_name):
+            fn = getattr(engine, method_name, None)
+            if fn:
+                return (name, fn)
+            return None
+
+        phases = list(filter(None, [
+            _phase("Extrayendo funciones...", "extract_functions"),
+            _phase("Detectando triggers...", "detect_triggers"),
+            _phase("Escaneando ofuscacion...", "detect_obfuscation"),
+            _phase("Analizando natives...", "analyze_natives"),
+            _phase("Analizando callbacks...", "analyze_callbacks"),
+            _phase("Analizando manifests...", "analyze_manifests"),
+            _phase("Escaneando seguridad...", "detect_security_issues"),
+            _phase("Fingerprinting anticheats...", "fingerprint_anticheats"),
+            _phase("Analizando cadenas de triggers...", "analyze_trigger_chains"),
+            _phase("Detectando codigo duplicado...", "detect_code_clones"),
+            _phase("Analisis de complejidad...", "analyze_code_complexity"),
+            _phase("Deteccion de backdoors...", "detect_backdoors"),
+            _phase("Deteccion de anomalias...", "detect_behavioral_anomalies"),
+            _phase("Detectando webhooks...", "detect_webhooks"),
+            _phase("Detectando ubicaciones RP...", "detect_all_locations"),
+        ]))
 
         for i, (msg, func) in enumerate(phases, 1):
             AppState.analysis_progress = f"Fase {i}/{len(phases)}: {msg}"
@@ -1204,8 +1219,11 @@ def _run_analysis_thread(dump_path):
 
         AppState.analysis_progress = "Generando reporte..."
 
-        # Build report data
-        AppState.report_data = _build_report_data(engine)
+        report = _build_report_data(engine)
+        if ambani_imported:
+            report['ambani_triggers_imported'] = ambani_imported
+            report['stats']['ambani_triggers_imported'] = ambani_imported
+        AppState.report_data = report
         AppState.analysis_done = True
         AppState.analysis_running = False
         AppState.analysis_progress = "Analisis completado"
@@ -1216,6 +1234,7 @@ def _run_analysis_thread(dump_path):
         traceback.print_exc()
 
 
+
 def _build_report_data(engine):
     """Construir diccionario de reporte desde el engine"""
     code_clones = []
@@ -1224,6 +1243,26 @@ def _build_report_data(engine):
             if len(files) > 1:
                 code_clones.append(files)
 
+    # Convertir triggers dict a list con asdict
+    triggers_list = []
+    if hasattr(engine.triggers, 'values'):
+        # Es un dict
+        triggers_list = [asdict(t) for t in engine.triggers.values()]
+    elif isinstance(engine.triggers, list):
+        # Ya es una lista
+        triggers_list = [asdict(t) if hasattr(t, '__dataclass_fields__') else t for t in engine.triggers]
+    
+    # Convert rp_locations to dict format
+    rp_locations_list = []
+    if hasattr(engine, 'rp_locations'):
+        for loc in engine.rp_locations:
+            if hasattr(loc, 'to_dict'):
+                rp_locations_list.append(loc.to_dict())
+            elif hasattr(loc, '__dataclass_fields__'):
+                rp_locations_list.append(asdict(loc))
+            else:
+                rp_locations_list.append(loc)
+    
     return {
         'tool': 'RED-SHADOW Destroyer v4.0',
         'timestamp': datetime.now().isoformat(),
@@ -1238,8 +1277,13 @@ def _build_report_data(engine):
             'obfuscations': len(engine.obfuscations),
             'security_issues': len(engine.security_issues),
             'anticheats': len(engine.anticheat_detected),
+            'backdoors': len(getattr(engine, 'backdoors', [])),
+            'anomalies': len(getattr(engine, 'anomalies', [])),
+            'complexity_files': len(getattr(engine, 'complexity_metrics', [])),
+            'rp_locations': len(getattr(engine, 'rp_locations', [])),
+            'webhooks': len(getattr(engine, 'webhooks', [])),
         },
-        'triggers': [asdict(t) for t in engine.triggers.values()],
+        'triggers': triggers_list,
         'callbacks': [asdict(c) for c in engine.callbacks],
         'natives': [asdict(n) for n in engine.natives],
         'obfuscations': [asdict(o) for o in engine.obfuscations],
@@ -1249,7 +1293,13 @@ def _build_report_data(engine):
         'trigger_chains': engine.trigger_chains,
         'cross_references': {k: list(v) for k, v in engine.cross_references.items()},
         'code_clones': code_clones[:100],
+        'backdoors': [asdict(b) for b in getattr(engine, 'backdoors', [])],
+        'anomalies': [asdict(a) for a in getattr(engine, 'anomalies', [])],
+        'complexity_metrics': [asdict(m) for m in getattr(engine, 'complexity_metrics', [])],
         'recommendations': engine._generate_recommendations(),
+        'rp_locations': rp_locations_list,
+        'webhooks': getattr(engine, 'webhooks', []),
+        'known_triggers': engine.match_known_triggers() if hasattr(engine, 'match_known_triggers') else [],
     }
 
 
