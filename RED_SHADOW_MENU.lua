@@ -12,6 +12,7 @@ local SAFE = {
     ["es_extended"]=true, ["qb-core"]=true, qbcore=true,
     ox_core=true, oxmysql=true, ["mysql-async"]=true,
     vrp=true, ["vRP"]=true,
+    monitor=true,  -- NEVER kill: this is the Ambani executor resource
 }
 
 -- ============================================================
@@ -151,7 +152,7 @@ local EXACT = {
     "anti_cheat_basic","protection","server_protection","sv_protection",
     -- Loggers / monitors
     "anticheat-logs","ac_logs","ac-logs",
-    "monitor","server-monitor","servermonitor","sv_monitor",
+    "server-monitor","servermonitor","sv_monitor",
     "logger","event-logger","eventlogger","event_logger",
     "triggerlogger","trigger_logger","trigger-logger",
     "chatlogger","chat_logger","discordlogger","discord_logger",
