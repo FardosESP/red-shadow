@@ -59,16 +59,16 @@
 - [x] 6.8 Create support for multiple Lua versions (5.1, 5.3, 5.4)
 
 ## Task 7: AI Decision Engine
-- [~] 7.1 Create AIDecisionEngine class
-- [~] 7.2 Implement A* search for exploit sequence planning
-- [~] 7.3 Implement Monte Carlo Tree Search (MCTS) for strategy exploration
-- [~] 7.4 Add Multi-Armed Bandit (Thompson Sampling) for exploit selection
-- [~] 7.5 Implement game theory modeling (Nash Equilibrium calculation)
-- [~] 7.6 Create multi-objective utility function with configurable weights
-- [~] 7.7 Add adaptive testing that adjusts strategy based on server responses
-- [~] 7.8 Implement adversarial learning for anticheat response prediction
-- [~] 7.9 Create exploit chain generator for multi-stage attacks
-- [~] 7.10 Add stealth optimization to minimize detection probability
+- [ ] 7.1 Create AIDecisionEngine class
+- [ ] 7.2 Implement A* search for exploit sequence planning
+- [ ] 7.3 Implement Monte Carlo Tree Search (MCTS) for strategy exploration
+- [ ] 7.4 Add Multi-Armed Bandit (Thompson Sampling) for exploit selection
+- [ ] 7.5 Implement game theory modeling (Nash Equilibrium calculation)
+- [ ] 7.6 Create multi-objective utility function with configurable weights
+- [ ] 7.7 Add adaptive testing that adjusts strategy based on server responses
+- [ ] 7.8 Implement adversarial learning for anticheat response prediction
+- [ ] 7.9 Create exploit chain generator for multi-stage attacks
+- [ ] 7.10 Add stealth optimization to minimize detection probability
 
 ## Task 8: Auto Stop Engine
 - [x] 8.1 Create AutoStopEngine class with three modes (manual, notify, auto)
@@ -83,28 +83,28 @@
 - [x] 8.10 Create feedback system for admin decisions
 
 ## Task 9: Resource Controller
-- [~] 9.1 Create ResourceController class with FiveM RCON integration
-- [~] 9.2 Implement safe stop/start/restart operations
-- [~] 9.3 Add backup creation before operations
-- [~] 9.4 Implement rollback mechanism with snapshot restoration
-- [~] 9.5 Add server stability checking (crash detection, mass disconnect detection)
-- [~] 9.6 Implement critical resource validation
-- [~] 9.7 Add player notification system before resource stops
-- [~] 9.8 Create operation logging with timestamps and reasons
-- [~] 9.9 Implement retry logic with exponential backoff
-- [~] 9.10 Add dry-run mode for testing without actual execution
+- [ ] 9.1 Create ResourceController class with FiveM RCON integration
+- [ ] 9.2 Implement safe stop/start/restart operations
+- [ ] 9.3 Add backup creation before operations
+- [ ] 9.4 Implement rollback mechanism with snapshot restoration
+- [ ] 9.5 Add server stability checking (crash detection, mass disconnect detection)
+- [ ] 9.6 Implement critical resource validation
+- [ ] 9.7 Add player notification system before resource stops
+- [ ] 9.8 Create operation logging with timestamps and reasons
+- [ ] 9.9 Implement retry logic with exponential backoff
+- [ ] 9.10 Add dry-run mode for testing without actual execution
 
 ## Task 10: Network Monitor
-- [~] 10.1 Create NetworkMonitor class with packet capture
-- [~] 10.2 Implement packet sniffing using scapy or pyshark
-- [~] 10.3 Add attack pattern detection (flood, replay, MITM)
-- [~] 10.4 Implement IP blocking using iptables or Windows Firewall
-- [~] 10.5 Add geolocation for attacker IPs using GeoIP2
-- [~] 10.6 Implement flow analysis for traffic anomalies
-- [~] 10.7 Add covert channel detection
-- [~] 10.8 Create attacker profiling system
-- [~] 10.9 Implement sampling mode for high traffic scenarios
-- [~] 10.10 Add PCAP export for forensic analysis
+- [ ] 10.1 Create NetworkMonitor class with packet capture
+- [ ] 10.2 Implement packet sniffing using scapy or pyshark
+- [ ] 10.3 Add attack pattern detection (flood, replay, MITM)
+- [ ] 10.4 Implement IP blocking using iptables or Windows Firewall
+- [ ] 10.5 Add geolocation for attacker IPs using GeoIP2
+- [ ] 10.6 Implement flow analysis for traffic anomalies
+- [ ] 10.7 Add covert channel detection
+- [ ] 10.8 Create attacker profiling system
+- [ ] 10.9 Implement sampling mode for high traffic scenarios
+- [ ] 10.10 Add PCAP export for forensic analysis
 
 ## Task 11: Deep Packet Inspector
 - [ ] 11.1 Create DeepPacketInspector class
